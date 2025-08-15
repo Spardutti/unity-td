@@ -280,26 +280,24 @@ public class TowerManager : MonoBehaviour
             mat.color = color;
         }
 
-        // Set preview mode BEFORE activating the object
-        if (ShowRangeDuringPlacement)
-        {
-            TowerRangeIndicator rangeIndicator = previewTower.GetComponent<TowerRangeIndicator>();
-            if (rangeIndicator != null)
-            {
-                // Set preview mode first so Start() won't hide the range
-                rangeIndicator.SetPreviewMode(true);
-            }
-        }
-
         previewTower.SetActive(true);
 
         // Show range indicator during placement if enabled
         if (ShowRangeDuringPlacement)
         {
-            TowerRangeIndicator rangeIndicator = previewTower.GetComponent<TowerRangeIndicator>();
+            StartCoroutine(ShowRangeNextFrame(previewTower));
+        }
+    }
+
+    private System.Collections.IEnumerator ShowRangeNextFrame(GameObject towerObj)
+    {
+        yield return null; // Wait one frame
+        
+        if (towerObj != null)
+        {
+            TowerRangeIndicator rangeIndicator = towerObj.GetComponent<TowerRangeIndicator>();
             if (rangeIndicator != null)
             {
-                // Call ShowRange to set the correct color and ensure visibility
                 rangeIndicator.ShowRange(RangeIndicatorType.Placement);
             }
         }
@@ -397,11 +395,10 @@ public class TowerManager : MonoBehaviour
 
         if (previewTower != null)
         {
-            // Reset preview mode and hide range indicator before destroying
+            // Hide range indicator before destroying
             TowerRangeIndicator rangeIndicator = previewTower.GetComponent<TowerRangeIndicator>();
             if (rangeIndicator != null)
             {
-                rangeIndicator.SetPreviewMode(false);
                 rangeIndicator.HideRange();
             }
 

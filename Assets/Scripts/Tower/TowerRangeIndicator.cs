@@ -12,7 +12,6 @@ public class TowerRangeIndicator : MonoBehaviour
     private LineRenderer lineRenderer;
     private Tower tower;
     private bool isVisible = false;
-    private bool isPreviewMode = false;
 
     void Awake()
     {
@@ -22,16 +21,7 @@ public class TowerRangeIndicator : MonoBehaviour
     void Start()
     {
         CreateRangeIndicator();
-        // Only hide if not in preview mode
-        if (!isPreviewMode)
-        {
-            HideRange();
-        }
-    }
-
-    public void SetPreviewMode(bool preview)
-    {
-        isPreviewMode = preview;
+        HideRange();
     }
 
     private void CreateRangeIndicator()
@@ -85,17 +75,7 @@ public class TowerRangeIndicator : MonoBehaviour
 
     public void ShowRange(RangeIndicatorType type = RangeIndicatorType.Normal)
     {
-        // Mark as preview mode if placement type
-        if (type == RangeIndicatorType.Placement)
-        {
-            isPreviewMode = true;
-        }
-
-        // Ensure indicator is created
-        if (rangeIndicatorObject == null)
-        {
-            CreateRangeIndicator();
-        }
+        if (rangeIndicatorObject == null) return;
 
         rangeIndicatorObject.SetActive(true);
         isVisible = true;
@@ -107,10 +87,7 @@ public class TowerRangeIndicator : MonoBehaviour
             _ => normalRangeColor
         };
 
-        if (lineRenderer != null)
-        {
-            lineRenderer.startColor = targetColor;
-        }
+        lineRenderer.startColor = targetColor;
         UpdateCirclePositions();
     }
 

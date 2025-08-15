@@ -108,7 +108,7 @@ public class Tower : MonoBehaviour
 
         foreach (Enemy enemy in allEnemies)
         {
-            if (enemy != null && enemy.IsAlive)
+            if (enemy != null && enemy.IsAlive && !enemy.GetComponent<EnemySpawner>())
             {
                 float distance = Vector3.Distance(transform.position, enemy.transform.position);
                 if (distance <= attackRange)

@@ -129,16 +129,10 @@ public class TowerManager : MonoBehaviour
         // Fallback input handling using direct keyboard/mouse input
         if (placeTowerAction == null)
         {
-            if (Mouse.current.leftButton.wasPressedThisFrame)
+            if (Mouse.current.leftButton.wasPressedThisFrame && isPlacementMode)
             {
-                if (isPlacementMode)
-                {
-                    TryPlaceTower();
-                }
-                else
-                {
-                    StartPlacementMode();
-                }
+                // Only place tower if already in placement mode
+                TryPlaceTower();
             }
         }
 
@@ -163,10 +157,7 @@ public class TowerManager : MonoBehaviour
         {
             TryPlaceTower();
         }
-        else
-        {
-            StartPlacementMode();
-        }
+        // Don't automatically enter placement mode on click
     }
 
     private void OnCancel(InputAction.CallbackContext context)

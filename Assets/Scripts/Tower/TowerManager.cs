@@ -138,7 +138,7 @@ public class TowerManager : MonoBehaviour
 
         if (cancelAction == null)
         {
-            if (Keyboard.current.escapeKey.wasPressedThisFrame)
+            if (Keyboard.current.escapeKey.wasPressedThisFrame && isPlacementMode)
             {
                 CancelPlacement();
             }
@@ -162,7 +162,10 @@ public class TowerManager : MonoBehaviour
 
     private void OnCancel(InputAction.CallbackContext context)
     {
-        CancelPlacement();
+        if (isPlacementMode)
+        {
+            CancelPlacement();
+        }
     }
 
     public void StartPlacementMode()

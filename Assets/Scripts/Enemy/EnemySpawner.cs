@@ -36,6 +36,14 @@ public class EnemySpawner : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+        // Safety check: Remove Enemy component if accidentally attached to spawner
+        Enemy enemyComponent = GetComponent<Enemy>();
+        if (enemyComponent != null)
+        {
+            Debug.LogWarning("EnemySpawner: Removing Enemy component from spawner GameObject!");
+            DestroyImmediate(enemyComponent);
+        }
+        
         SetupUI();
         CreateEnemyPrefabIfNeeded();
     }
@@ -59,14 +67,20 @@ public class EnemySpawner : MonoBehaviour
         {
             Debug.Log("EnemySpawner: Creating enemy prefab automatically...");
 
-            GameObject prefab = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            prefab.name = "Enemy";
+            // Create a new GameObject for the prefab (not using this GameObject)
+            GameObject prefab = new GameObject("EnemyPrefab");
+            
+            // Add visual components
+            GameObject visual = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            visual.transform.SetParent(prefab.transform);
+            visual.transform.localPosition = Vector3.zero;
+            visual.name = "Visual";
 
-            // Add enemy script
+            // Add enemy script to the prefab (not to the spawner)
             prefab.AddComponent<Enemy>();
 
             // Make it red
-            Renderer renderer = prefab.GetComponent<Renderer>();
+            Renderer renderer = visual.GetComponent<Renderer>();
             if (renderer != null)
             {
                 renderer.material.color = Color.red;

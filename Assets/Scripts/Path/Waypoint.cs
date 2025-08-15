@@ -22,13 +22,11 @@ public class Waypoint : MonoBehaviour
     private void SnapToGrid()
     {
         GridManager gridManager = FindFirstObjectByType<GridManager>();
+        GridUtility.SnapToGrid(transform, gridManager);
+
         if (gridManager != null)
         {
-            Vector2Int gridCoors = gridManager.WorldToGrid(transform.position);
-            Vector3 gridWorldPos = gridManager.GridToWorld(gridCoors);
-
-            transform.position = gridWorldPos;
-
+            Vector2Int gridCoors = GridUtility.GetGridPosition(transform, gridManager);
             Debug.Log($"Waypoint {waypointOrder} snapped to grid cell ({gridCoors.x}, {gridCoors.y})");
         }
     }
@@ -52,12 +50,7 @@ public class Waypoint : MonoBehaviour
     public Vector2Int GetGridCoordinates()
     {
         GridManager gridManager = FindFirstObjectByType<GridManager>();
-        if (gridManager != null)
-        {
-            return gridManager.WorldToGrid(transform.position);
-        }
-
-        return Vector2Int.zero;
+        return GridUtility.GetGridPosition(transform, gridManager);
     }
 
     void OnDrawGizmos()

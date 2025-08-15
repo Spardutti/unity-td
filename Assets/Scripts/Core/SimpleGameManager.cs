@@ -14,10 +14,7 @@ public class SimpleGameManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Keyboard.current.escapeKey.wasPressedThisFrame)
-        {
-            GoBackToMainMenu();
-        }
+
     }
 
     public void GoBackToMainMenu()

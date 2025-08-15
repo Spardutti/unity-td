@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using System.Collections;
 using System.Collections.Generic;
 
 public class TowerManager : MonoBehaviour
@@ -14,6 +15,11 @@ public class TowerManager : MonoBehaviour
     [SerializeField] private Material previewMaterial;
     [SerializeField] private bool showPlacementPreview = true;
 
+    [Header("Range Visualization")]
+    [SerializeField] private bool ShowRangeDuringPlacement = true;
+    [SerializeField] private bool showRangeOnHover = true;
+    [SerializeField] private KeyCode toggleRangeKey = KeyCode.R;
+
     [Header("Input")]
     [SerializeField] private InputActionReference placeTowerAction;
     [SerializeField] private InputActionReference cancelAction;
@@ -25,6 +31,8 @@ public class TowerManager : MonoBehaviour
     private GameObject previewTower;
     private bool isPlacementMode = false;
     private int towersBuilt = 0;
+
+    private Tower hoveredTower;
 
     // Public properties
     public int TowersBuilt => towersBuilt;
@@ -80,6 +88,44 @@ public class TowerManager : MonoBehaviour
         {
             UpdatePlacementPreview();
         }
+        else if (showRangeOnHover)
+        {
+            HandleMouseHover();
+        }
+    }
+
+    private void HandleMouseHover()
+    {
+        Vector2 mousePos = Mouse.current.position.ReadValue();
+        Ray ray = playerCamera.ScreenPointToRay(mousePos);
+
+        Tower newHoveredTower = null;
+
+        // Raycast to find towers
+        if (Physics.Raycast(ray, out RaycastHit hit))
+        {
+            newHoveredTower = hit.collider.GetComponent<Tower>();
+        }
+
+        // Handle hover state changes
+        if (newHoveredTower != hoveredTower)
+        {
+            // Hide previous tower's range
+            if (hoveredTower != null)
+            {
+                TowerRangeIndicator oldIndicator = hoveredTower.GetComponent<TowerRangeIndicator>();
+                oldIndicator?.HideRange();
+            }
+
+            // Show new tower's range
+            if (newHoveredTower != null)
+            {
+                TowerRangeIndicator newIndicator = newHoveredTower.GetComponent<TowerRangeIndicator>();
+                newIndicator?.ShowRange(RangeIndicatorType.Hover);
+            }
+
+            hoveredTower = newHoveredTower;
+        }
     }
 
     private void CreateDefaultTowerPrefab()
@@ -90,6 +136,9 @@ public class TowerManager : MonoBehaviour
         // Add Tower script
         prefab.AddComponent<Tower>();
 
+        // Range indicator
+        TowerRangeIndicator rangeIndicator = prefab.AddComponent<TowerRangeIndicator>();
+
         // Make it blue
         Renderer renderer = prefab.GetComponent<Renderer>();
         if (renderer != null)
@@ -97,11 +146,11 @@ public class TowerManager : MonoBehaviour
             renderer.material.color = Color.blue;
         }
 
-        // Remove collider (we'll handle placement differently)
+        // Add collider for hover detection
         Collider collider = prefab.GetComponent<Collider>();
-        if (collider != null)
+        if (collider == null)
         {
-            DestroyImmediate(collider);
+            collider = prefab.AddComponent<CapsuleCollider>();
         }
 
         towerPrefab = prefab;
@@ -177,6 +226,17 @@ public class TowerManager : MonoBehaviour
         }
 
         isPlacementMode = true;
+
+        // Hide hover ranges when entering placement mode
+        if (hoveredTower != null)
+        {
+            TowerRangeIndicator indicator = hoveredTower.GetComponent<TowerRangeIndicator>();
+            if (indicator != null)
+            {
+                indicator.HideRange();
+            }
+            hoveredTower = null;
+        }
         CreatePlacementPreview();
 
         Debug.Log("TowerManager: Placement mode started - Click to place tower, ESC to cancel");
@@ -228,6 +288,17 @@ public class TowerManager : MonoBehaviour
         }
 
         previewTower.SetActive(true);
+
+        // Show range indicator during placement if enabled
+        if (ShowRangeDuringPlacement)
+        {
+            TowerRangeIndicator rangeIndicator = previewTower.GetComponent<TowerRangeIndicator>();
+            if (rangeIndicator != null)
+            {
+                // Call ShowRange immediately and it will handle initialization
+                rangeIndicator.ShowRange(RangeIndicatorType.Placement);
+            }
+        }
     }
 
     private void UpdatePlacementPreview()
@@ -307,7 +378,7 @@ public class TowerManager : MonoBehaviour
         }
 
         // Grid cell will be occupied by the Tower's RegisterWithGrid method
-        
+
         towersBuilt++;
 
         Debug.Log($"TowerManager: Placed tower {towersBuilt} at grid ({gridPos.x}, {gridPos.y})");
@@ -322,11 +393,55 @@ public class TowerManager : MonoBehaviour
 
         if (previewTower != null)
         {
+            // Hide range indicator before destroying
+            TowerRangeIndicator rangeIndicator = previewTower.GetComponent<TowerRangeIndicator>();
+            if (rangeIndicator != null)
+            {
+                rangeIndicator.HideRange();
+            }
+
             DestroyImmediate(previewTower);
             previewTower = null;
         }
 
         Debug.Log("TowerManager: Placement cancelled");
+    }
+
+    public void ToggleAllTowerRanges()
+    {
+        foreach (Tower tower in activeTowers)
+        {
+            if (tower != null)
+            {
+                TowerRangeIndicator indicator = tower.GetComponent<TowerRangeIndicator>();
+                if (indicator != null)
+                {
+                    indicator.ToggleRange();
+                }
+            }
+        }
+    }
+
+    public void ShowAllTowerRanges()
+    {
+        foreach (Tower tower in activeTowers)
+        {
+            TowerRangeIndicator indicator = tower.GetComponent<TowerRangeIndicator>();
+            if (indicator != null)
+            {
+
+                indicator.ShowRange();
+            }
+        }
+    }
+
+    public void HideAllTowerRanges()
+    {
+        foreach (Tower tower in activeTowers)
+        {
+            TowerRangeIndicator indicator = tower.GetComponent<TowerRangeIndicator>();
+            indicator.HideRange();
+        }
     }
 
     public void DestroyTower(Tower tower)

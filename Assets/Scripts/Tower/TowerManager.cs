@@ -303,8 +303,7 @@ public class TowerManager : MonoBehaviour
             activeTowers.Add(towerComponent);
         }
 
-        // Mark grid cell as occupied
-        gridManager.TryOccupyCell(gridPos);
+        // Grid cell will be occupied by the Tower's RegisterWithGrid method
         
         towersBuilt++;
 

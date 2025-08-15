@@ -150,6 +150,55 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1371568731}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &135657902
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 135657903}
+  - component: {fileID: 135657904}
+  m_Layer: 0
+  m_Name: TowerUI
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &135657903
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 135657902}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 936251188}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &135657904
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 135657902}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a27f877259967f649bae3e3626ae7b96, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TowerUIManager
+  placeTowerButton: {fileID: 0}
+  cancelPlacementButton: {fileID: 0}
+  statusText: {fileID: 0}
+  towerCountText: {fileID: 0}
+  autoCreateUI: 1
 --- !u!1 &145615640
 GameObject:
   m_ObjectHideFlags: 0
@@ -186,6 +235,9 @@ MonoBehaviour:
   pathLineWidth: 0.1
   markPathCellsOnGrid: 1
   gridManager: {fileID: 0}
+  OnPathSetupComplete:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!4 &145615642
 Transform:
   m_ObjectHideFlags: 0
@@ -601,7 +653,7 @@ Transform:
   m_GameObject: {fileID: 481281172}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.5697999, y: 0, z: 2.14645}
+  m_LocalPosition: {x: 1.06, y: 0, z: 2.14645}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -668,15 +720,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 627ef04a1855dfc4f825fe5d8e293042, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TerrainVisualManager
-  terrainTilemap: {fileID: 0}
-  tilemapRenderer: {fileID: 0}
-  grassTile: {fileID: 0}
-  dirtPathTile: {fileID: 0}
-  buildableTile: {fileID: 0}
-  autoCreateTiles: 1
+  grassMaterial: {fileID: 0}
+  dirtPathMaterial: {fileID: 0}
+  buildableMaterial: {fileID: 0}
+  autoCreateMaterials: 1
   grassColor: {r: 0, g: 1, b: 0, a: 1}
-  dirtPathColor: {r: 0.6470588, g: 0.1647059, b: 0.1647059, a: 1}
+  dirtColor: {r: 0.6, g: 0.4, b: 0.2, a: 1}
   buildableColor: {r: 0.8705883, g: 0.7215686, b: 0.5294118, a: 1}
+  tileHeight: 0.1
+  castShadows: 0
 --- !u!4 &725325983
 Transform:
   m_ObjectHideFlags: 0
@@ -722,6 +774,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 437730907}
+  - {fileID: 135657903}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &952657368
@@ -958,6 +1011,7 @@ Transform:
   - {fileID: 121495155}
   - {fileID: 1574014366}
   - {fileID: 378159836}
+  - {fileID: 1561682090}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1473348423
@@ -1004,6 +1058,60 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1561682089
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1561682090}
+  - component: {fileID: 1561682091}
+  m_Layer: 0
+  m_Name: TowerManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1561682090
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1561682089}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1371568731}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1561682091
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1561682089}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ce76a0c55fdc220448e2f7c94d259ed5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TowerManager
+  towerPrefab: {fileID: 0}
+  towerParent: {fileID: 0}
+  autoCreateTowerPrefab: 1
+  groundLayerMask:
+    serializedVersion: 2
+    m_Bits: 1
+  previewMaterial: {fileID: 0}
+  showPlacementPreview: 1
+  placeTowerAction: {fileID: 0}
+  cancelAction: {fileID: 0}
 --- !u!1 &1574014364
 GameObject:
   m_ObjectHideFlags: 0
@@ -1042,6 +1150,9 @@ MonoBehaviour:
   OnCellTypeChanged:
     m_PersistentCalls:
       m_Calls: []
+  OnGridInitialized:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!4 &1574014366
 Transform:
   m_ObjectHideFlags: 0
@@ -1069,15 +1180,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 627ef04a1855dfc4f825fe5d8e293042, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TerrainVisualManager
-  terrainTilemap: {fileID: 0}
-  tilemapRenderer: {fileID: 0}
-  grassTile: {fileID: 0}
-  dirtPathTile: {fileID: 0}
-  buildableTile: {fileID: 0}
-  autoCreateTiles: 1
+  grassMaterial: {fileID: 0}
+  dirtPathMaterial: {fileID: 0}
+  buildableMaterial: {fileID: 0}
+  autoCreateMaterials: 1
   grassColor: {r: 0, g: 1, b: 0, a: 1}
-  dirtPathColor: {r: 0.6470588, g: 0.1647059, b: 0.1647059, a: 1}
+  dirtColor: {r: 0.6, g: 0.4, b: 0.2, a: 1}
   buildableColor: {r: 0.8705883, g: 0.7215686, b: 0.5294118, a: 1}
+  tileHeight: 0.1
+  castShadows: 0
 --- !u!1 &1576269760
 GameObject:
   m_ObjectHideFlags: 0

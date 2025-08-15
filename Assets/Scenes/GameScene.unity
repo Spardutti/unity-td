@@ -639,6 +639,59 @@ Transform:
   - {fileID: 162862396}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &725325981
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 725325983}
+  - component: {fileID: 725325982}
+  m_Layer: 0
+  m_Name: Terrain System
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &725325982
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 725325981}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 627ef04a1855dfc4f825fe5d8e293042, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TerrainVisualManager
+  terrainTilemap: {fileID: 0}
+  tilemapRenderer: {fileID: 0}
+  grassTile: {fileID: 0}
+  dirtPathTile: {fileID: 0}
+  buildableTile: {fileID: 0}
+  autoCreateTiles: 1
+  grassColor: {r: 0, g: 1, b: 0, a: 1}
+  dirtPathColor: {r: 0.6470588, g: 0.1647059, b: 0.1647059, a: 1}
+  buildableColor: {r: 0.8705883, g: 0.7215686, b: 0.5294118, a: 1}
+--- !u!4 &725325983
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 725325981}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 3.2902, y: 0, z: 12.56355}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &936251187
 GameObject:
   m_ObjectHideFlags: 0
@@ -961,6 +1014,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1574014366}
   - component: {fileID: 1574014365}
+  - component: {fileID: 1574014367}
   m_Layer: 0
   m_Name: GridManager
   m_TagString: Untagged
@@ -985,6 +1039,9 @@ MonoBehaviour:
   cellSize: 1
   showGridInEditor: 1
   gridLineColor: {r: 0.78431374, g: 0.7084306, b: 0.121568605, a: 1}
+  OnCellTypeChanged:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!4 &1574014366
 Transform:
   m_ObjectHideFlags: 0
@@ -1000,6 +1057,27 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1371568731}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1574014367
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1574014364}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 627ef04a1855dfc4f825fe5d8e293042, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TerrainVisualManager
+  terrainTilemap: {fileID: 0}
+  tilemapRenderer: {fileID: 0}
+  grassTile: {fileID: 0}
+  dirtPathTile: {fileID: 0}
+  buildableTile: {fileID: 0}
+  autoCreateTiles: 1
+  grassColor: {r: 0, g: 1, b: 0, a: 1}
+  dirtPathColor: {r: 0.6470588, g: 0.1647059, b: 0.1647059, a: 1}
+  buildableColor: {r: 0.8705883, g: 0.7215686, b: 0.5294118, a: 1}
 --- !u!1 &1576269760
 GameObject:
   m_ObjectHideFlags: 0
@@ -1310,3 +1388,4 @@ SceneRoots:
   - {fileID: 936251188}
   - {fileID: 567357717}
   - {fileID: 1170207193}
+  - {fileID: 725325983}

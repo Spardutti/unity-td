@@ -1,7 +1,5 @@
-using UnityEditor.ShaderGraph.Internal;
-using UnityEditor.U2D.Aseprite;
 using UnityEngine;
-using UnityEngine.Rendering;
+using UnityEngine.Events;
 
 public class GridManager : MonoBehaviour
 {
@@ -14,8 +12,13 @@ public class GridManager : MonoBehaviour
     [SerializeField] private bool showGridInEditor = true;
     [SerializeField] private Color gridLineColor = Color.white;
 
+    [Header("Events")]
+    public UnityEvent<int, int, CellType> OnCellTypeChanged;
+    public UnityEvent OnGridInitialized;
+
     // 2D array to store the grid
     private GridCell[,] grid;
+    private TerrainVisualManager terrainVisualManager;
 
     public int Width => gridWidth;
     public int Height => gridHeight;
@@ -25,6 +28,8 @@ public class GridManager : MonoBehaviour
     void Awake()
     {
         CreateGrid();
+        terrainVisualManager = GetComponent<TerrainVisualManager>();
+
     }
     void Start()
     {
@@ -96,6 +101,69 @@ public class GridManager : MonoBehaviour
     public GridCell GetCell(Vector2Int gridCoordinates)
     {
         return GetCell(gridCoordinates.x, gridCoordinates.y);
+    }
+
+    public void SetCellType(int gridX, int gridY, CellType newType)
+    {
+        GridCell cell = GetCell(gridX, gridY);
+        if (cell != null && cell.cellType != newType)
+        {
+            cell.cellType = newType;
+            cell.isOccupied = newType == CellType.Path || newType == CellType.Occupied || newType == CellType.Blocked;
+
+            // Notify visual manager
+            OnCellTypeChanged?.Invoke(gridX, gridY, newType);
+
+            // update terrain visual if manager exist
+            terrainVisualManager?.UpdateCellVisual(gridX, gridY, newType);
+        }
+    }
+
+    public void SetCellType(Vector2Int gridCoordinates, CellType newType)
+    {
+        SetCellType(gridCoordinates.x, gridCoordinates.y, newType);
+    }
+
+    public bool CanBuildAt(int gridX, int gridY)
+    {
+        GridCell cell = GetCell(gridX, gridY);
+        return cell != null && cell.cellType == CellType.Buildable && !cell.isOccupied;
+    }
+
+    public bool CanBuildAt(Vector2Int gridCoordinates)
+    {
+        return CanBuildAt(gridCoordinates.x, gridCoordinates.y);
+    }
+
+    // Method to mark cell as occupied for towers
+    public bool TryOccupyCell(int gridX, int gridY)
+    {
+        if (CanBuildAt(gridX, gridY))
+        {
+            SetCellType(gridX, gridY, CellType.Occupied);
+            return true;
+        }
+        return false;
+
+    }
+
+    public bool TryOccupyCell(Vector2Int gridCoordinates)
+    {
+        return TryOccupyCell(gridCoordinates.x, gridCoordinates.y);
+    }
+
+    public void FreeCell(int gridX, int gridY)
+    {
+        GridCell cell = GetCell(gridX, gridY);
+        if (cell != null && cell.cellType == CellType.Occupied)
+        {
+            SetCellType(gridX, gridY, CellType.Buildable);
+        }
+    }
+
+    public void FreeCell(Vector2Int gridCoordinates)
+    {
+        FreeCell(gridCoordinates.x, gridCoordinates.y);
     }
 
     // Draw grid lines in the Scene view (for debugging)

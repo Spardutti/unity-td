@@ -176,11 +176,13 @@ public class Tower : MonoBehaviour
     {
         if (currentTarget == null) return;
 
-        // Face the target
-        Vector3 direction = (currentTarget.transform.position - transform.position).normalized;
+        // Face the target (only rotate on Y axis to prevent tilting)
+        Vector3 direction = currentTarget.transform.position - transform.position;
+        direction.y = 0; // Keep only horizontal direction
         if (direction != Vector3.zero)
         {
-            transform.rotation = Quaternion.LookRotation(direction);
+            Quaternion targetRotation = Quaternion.LookRotation(direction);
+            transform.rotation = Quaternion.Euler(0, targetRotation.eulerAngles.y, 0);
         }
 
         // Deal Damage

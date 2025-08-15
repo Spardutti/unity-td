@@ -292,7 +292,8 @@ public class TowerManager : MonoBehaviour
         Vector3 worldPos = gridManager.GridToWorld(gridPos);
         Vector3 spawnPos = new Vector3(worldPos.x, 0.5f, worldPos.z);
 
-        GameObject newTower = Instantiate(towerPrefab, spawnPos, Quaternion.identity, towerParent);
+        // Ensure tower spawns with no rotation (upright)
+        GameObject newTower = Instantiate(towerPrefab, spawnPos, Quaternion.Euler(0, 0, 0), towerParent);
         newTower.SetActive(true);
         newTower.name = $"Tower_{towersBuilt:000}";
 
@@ -302,6 +303,9 @@ public class TowerManager : MonoBehaviour
             activeTowers.Add(towerComponent);
         }
 
+        // Mark grid cell as occupied
+        gridManager.TryOccupyCell(gridPos);
+        
         towersBuilt++;
 
         Debug.Log($"TowerManager: Placed tower {towersBuilt} at grid ({gridPos.x}, {gridPos.y})");

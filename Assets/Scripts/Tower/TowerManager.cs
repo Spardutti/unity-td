@@ -7,8 +7,8 @@ public class TowerManager : MonoBehaviour
 {
     [Header("Tower Settings")]
     [SerializeField] private GameObject towerPrefab;
+    [SerializeField] private GameObject towerPreviewPrefab; // Optional separate preview prefab
     [SerializeField] private Transform towerParent;
-    [SerializeField] private bool autoCreateTowerPrefab = true;
 
     [Header("Placement Settings")]
     [SerializeField] private LayerMask groundLayerMask = 1; // Default layer
@@ -58,11 +58,7 @@ public class TowerManager : MonoBehaviour
 
     void Start()
     {
-        if (autoCreateTowerPrefab && towerPrefab == null)
-        {
-            CreateDefaultTowerPrefab();
-        }
-
+        ValidateTowerPrefab();
         SetupInput();
 
         Debug.Log("TowerManager: Ready for tower placement");
@@ -128,35 +124,30 @@ public class TowerManager : MonoBehaviour
         }
     }
 
-    private void CreateDefaultTowerPrefab()
+    private void ValidateTowerPrefab()
     {
-        GameObject prefab = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-        prefab.name = "Tower";
-
-        // Add Tower script
-        prefab.AddComponent<Tower>();
-
-        // Range indicator
-        TowerRangeIndicator rangeIndicator = prefab.AddComponent<TowerRangeIndicator>();
-
-        // Make it blue
-        Renderer renderer = prefab.GetComponent<Renderer>();
-        if (renderer != null)
+        if (towerPrefab == null)
         {
-            renderer.material.color = Color.blue;
+            Debug.LogError("TowerManager: Tower prefab is not assigned! Please assign a tower prefab in the inspector.");
+        }
+        else
+        {
+            // Validate that the prefab has required components
+            if (towerPrefab.GetComponent<Tower>() == null)
+            {
+                Debug.LogWarning("TowerManager: Tower prefab doesn't have a Tower component!");
+            }
+            if (towerPrefab.GetComponent<TowerRangeIndicator>() == null)
+            {
+                Debug.LogWarning("TowerManager: Tower prefab doesn't have a TowerRangeIndicator component!");
+            }
         }
 
-        // Add collider for hover detection
-        Collider collider = prefab.GetComponent<Collider>();
-        if (collider == null)
+        // If no separate preview prefab is assigned, we'll use the main tower prefab
+        if (towerPreviewPrefab == null)
         {
-            collider = prefab.AddComponent<CapsuleCollider>();
+            Debug.Log("TowerManager: No separate preview prefab assigned, will use main tower prefab for preview.");
         }
-
-        towerPrefab = prefab;
-        prefab.SetActive(false);
-
-        Debug.Log("TowerManager: Created default tower prefab");
     }
 
     private void SetupInput()
@@ -263,7 +254,9 @@ public class TowerManager : MonoBehaviour
             DestroyImmediate(previewTower);
         }
 
-        previewTower = Instantiate(towerPrefab);
+        // Use preview prefab if available, otherwise use main tower prefab
+        GameObject prefabToUse = towerPreviewPrefab != null ? towerPreviewPrefab : towerPrefab;
+        previewTower = Instantiate(prefabToUse);
         previewTower.name = "Tower Preview";
 
         // Disable the tower script on preview
@@ -287,6 +280,17 @@ public class TowerManager : MonoBehaviour
             mat.color = color;
         }
 
+        // Set preview mode BEFORE activating the object
+        if (ShowRangeDuringPlacement)
+        {
+            TowerRangeIndicator rangeIndicator = previewTower.GetComponent<TowerRangeIndicator>();
+            if (rangeIndicator != null)
+            {
+                // Set preview mode first so Start() won't hide the range
+                rangeIndicator.SetPreviewMode(true);
+            }
+        }
+
         previewTower.SetActive(true);
 
         // Show range indicator during placement if enabled
@@ -295,7 +299,7 @@ public class TowerManager : MonoBehaviour
             TowerRangeIndicator rangeIndicator = previewTower.GetComponent<TowerRangeIndicator>();
             if (rangeIndicator != null)
             {
-                // Call ShowRange immediately and it will handle initialization
+                // Call ShowRange to set the correct color and ensure visibility
                 rangeIndicator.ShowRange(RangeIndicatorType.Placement);
             }
         }
@@ -393,10 +397,11 @@ public class TowerManager : MonoBehaviour
 
         if (previewTower != null)
         {
-            // Hide range indicator before destroying
+            // Reset preview mode and hide range indicator before destroying
             TowerRangeIndicator rangeIndicator = previewTower.GetComponent<TowerRangeIndicator>();
             if (rangeIndicator != null)
             {
+                rangeIndicator.SetPreviewMode(false);
                 rangeIndicator.HideRange();
             }
 

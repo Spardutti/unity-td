@@ -2,16 +2,10 @@ using UnityEngine;
 
 public class TerrainVisualManager : MonoBehaviour
 {
-    [Header("Visual Settings")]
-    [SerializeField] private Material grassMaterial;
-    [SerializeField] private Material dirtPathMaterial;
-    [SerializeField] private Material buildableMaterial;
-
-    [Header("Auto-Creation Settings")]
-    [SerializeField] private bool autoCreateMaterials = true;
-    [SerializeField] private Color grassColor = new Color(0.4f, 0.8f, 0.2f); // Green
-    [SerializeField] private Color dirtColor = new Color(0.6f, 0.4f, 0.2f);  // Brown
-    [SerializeField] private Color buildableColor = new Color(0.8f, 0.8f, 0.6f); // Light brown
+    [Header("Terrain Prefabs")]
+    [SerializeField] private GameObject grassTilePrefab;
+    [SerializeField] private GameObject pathTilePrefab;
+    [SerializeField] private GameObject buildableTilePrefab;
 
     [Header("3D Settings")]
     [SerializeField] private float tileHeight = 0.1f;
@@ -42,10 +36,7 @@ public class TerrainVisualManager : MonoBehaviour
     {
         SetupParent();
 
-        if (autoCreateMaterials)
-        {
-            CreateSimpleMaterials();
-        }
+        ValidatePrefabs();
 
         if (pathManager != null)
         {
@@ -79,21 +70,27 @@ public class TerrainVisualManager : MonoBehaviour
         tileGameObjects = new GameObject[gridManager.Width, gridManager.Height];
     }
 
-    private void CreateSimpleMaterials()
+    private void ValidatePrefabs()
     {
-        grassMaterial = CreateColoredMaterial(grassColor, "Grass Material");
-        dirtPathMaterial = CreateColoredMaterial(dirtColor, "Dirt Path Material");
-        buildableMaterial = CreateColoredMaterial(buildableColor, "Buildable Material");
+        if (grassTilePrefab == null)
+        {
+            Debug.LogError("TerrainVisualManager: Grass Tile Prefab is not assigned!");
+        }
 
-        Debug.Log("Terrain3DVisualManager: Created simple colored materials");
-    }
+        if (pathTilePrefab == null)
+        {
+            Debug.LogError("TerrainVisualManager: Path Tile Prefab is not assigned!");
+        }
 
-    private Material CreateColoredMaterial(Color color, string name)
-    {
-        Material mat = new Material(Shader.Find("Universal Render Pipeline/Lit"));
-        mat.color = color;
-        mat.name = name;
-        return mat;
+        if (buildableTilePrefab == null)
+        {
+            Debug.LogError("TerrainVisualManager: Buildable Tile Prefab is not assigned!");
+        }
+
+        if (grassTilePrefab != null && pathTilePrefab != null && buildableTilePrefab != null)
+        {
+            Debug.Log("TerrainVisualManager: All terrain prefabs validated successfully.");
+        }
     }
 
     public void GenerateTerrainVisuals()
@@ -122,16 +119,19 @@ public class TerrainVisualManager : MonoBehaviour
                 CellType cellType = cell?.cellType ?? CellType.Buildable;
 
                 GameObject tileObj = CreateTileGameObject(x, y, cellType);
-                tileGameObjects[x, y] = tileObj;
-
-                tilesCreated++;
-                if (cellType == CellType.Path) pathTiles++;
-                else grassTiles++;
-
-                // Debug first few tiles
-                if (tilesCreated <= 5)
+                if (tileObj != null)
                 {
-                    Debug.Log($"Created tile at ({x},{y}) - Type: {cellType}, Position: {tileObj.transform.position}");
+                    tileGameObjects[x, y] = tileObj;
+
+                    tilesCreated++;
+                    if (cellType == CellType.Path) pathTiles++;
+                    else grassTiles++;
+
+                    // Debug first few tiles
+                    if (tilesCreated <= 5)
+                    {
+                        Debug.Log($"Created tile at ({x},{y}) - Type: {cellType}, Position: {tileObj.transform.position}");
+                    }
                 }
             }
         }
@@ -141,8 +141,15 @@ public class TerrainVisualManager : MonoBehaviour
 
     private GameObject CreateTileGameObject(int gridX, int gridY, CellType cellType)
     {
-        // Create a plane GameObject
-        GameObject tileObj = GameObject.CreatePrimitive(PrimitiveType.Plane);
+        GameObject prefabToUse = GetPrefabForCellType(cellType);
+        
+        if (prefabToUse == null)
+        {
+            Debug.LogError($"TerrainVisualManager: No prefab assigned for cell type {cellType} at ({gridX}, {gridY})!");
+            return null;
+        }
+
+        GameObject tileObj = Instantiate(prefabToUse);
         tileObj.name = $"Tile_{gridX}_{gridY}";
         tileObj.transform.SetParent(tilesParent);
 
@@ -150,40 +157,18 @@ public class TerrainVisualManager : MonoBehaviour
         Vector3 worldPos = gridManager.GridToWorld(gridX, gridY);
         tileObj.transform.position = new Vector3(worldPos.x, 0, worldPos.z);
 
-        // Scale the tile to match grid cell size
-        float scale = gridManager.CellSize / 10f; // Plane is 10x10 units by default
-        tileObj.transform.localScale = new Vector3(scale, 1f, scale);
-
-        // Apply appropriate material
-        Material materialToUse = GetMaterialForCellType(cellType);
-        if (materialToUse != null)
-        {
-            Renderer renderer = tileObj.GetComponent<Renderer>();
-            renderer.material = materialToUse;
-            renderer.shadowCastingMode = castShadows ?
-                UnityEngine.Rendering.ShadowCastingMode.On :
-                UnityEngine.Rendering.ShadowCastingMode.Off;
-        }
-
-        // Remove collider if we don't need it
-        Collider collider = tileObj.GetComponent<Collider>();
-        if (collider != null)
-        {
-            DestroyImmediate(collider);
-        }
-
         return tileObj;
     }
 
-    private Material GetMaterialForCellType(CellType cellType)
+    private GameObject GetPrefabForCellType(CellType cellType)
     {
         return cellType switch
         {
-            CellType.Path => dirtPathMaterial,
-            CellType.Buildable => buildableMaterial ?? grassMaterial,
-            CellType.Blocked => dirtPathMaterial,
-            CellType.Occupied => grassMaterial,
-            _ => grassMaterial
+            CellType.Path => pathTilePrefab,
+            CellType.Buildable => buildableTilePrefab ?? grassTilePrefab,
+            CellType.Blocked => pathTilePrefab,
+            CellType.Occupied => grassTilePrefab,
+            _ => grassTilePrefab
         };
     }
 
@@ -216,18 +201,17 @@ public class TerrainVisualManager : MonoBehaviour
             x >= 0 && x < tileGameObjects.GetLength(0) &&
             y >= 0 && y < tileGameObjects.GetLength(1))
         {
-            GameObject tileObj = tileGameObjects[x, y];
-            if (tileObj != null)
+            GameObject oldTile = tileGameObjects[x, y];
+            if (oldTile != null)
             {
-                Material newMaterial = GetMaterialForCellType(newCellType);
-                if (newMaterial != null)
-                {
-                    Renderer renderer = tileObj.GetComponent<Renderer>();
-                    if (renderer != null)
-                    {
-                        renderer.material = newMaterial;
-                    }
-                }
+                DestroyImmediate(oldTile);
+            }
+
+            // Create new tile with correct type
+            GameObject newTile = CreateTileGameObject(x, y, newCellType);
+            if (newTile != null)
+            {
+                tileGameObjects[x, y] = newTile;
             }
         }
     }
@@ -246,10 +230,8 @@ public class TerrainVisualManager : MonoBehaviour
 
     void OnValidate()
     {
-        // Update materials in editor when colors change
-        if (Application.isPlaying && autoCreateMaterials)
+        if (Application.isPlaying)
         {
-            CreateSimpleMaterials();
             RefreshTerrainVisuals();
         }
     }

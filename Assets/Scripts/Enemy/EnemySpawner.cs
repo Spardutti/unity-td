@@ -11,7 +11,6 @@ public class EnemySpawner : MonoBehaviour
     [SerializeField] private Button spawnButton;
 
     [Header("Spawn Settings")]
-    [SerializeField] private bool autoCreateEnemyPrefab = true;
     [SerializeField] private Vector3 spawnOffset = Vector3.up * 0.5f;
 
     private PathManager pathManager;
@@ -45,7 +44,7 @@ public class EnemySpawner : MonoBehaviour
         }
         
         SetupUI();
-        CreateEnemyPrefabIfNeeded();
+        ValidateEnemyPrefab();
     }
 
     private void SetupUI()
@@ -61,36 +60,19 @@ public class EnemySpawner : MonoBehaviour
         }
     }
 
-    private void CreateEnemyPrefabIfNeeded()
+    private void ValidateEnemyPrefab()
     {
-        if (enemyPrefab == null && autoCreateEnemyPrefab)
+        if (enemyPrefab == null)
         {
-            Debug.Log("EnemySpawner: Creating enemy prefab automatically...");
-
-            // Create a new GameObject for the prefab (not using this GameObject)
-            GameObject prefab = new GameObject("EnemyPrefab");
-            
-            // Add visual components
-            GameObject visual = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            visual.transform.SetParent(prefab.transform);
-            visual.transform.localPosition = Vector3.zero;
-            visual.name = "Visual";
-
-            // Add enemy script to the prefab (not to the spawner)
-            prefab.AddComponent<Enemy>();
-
-            // Make it red
-            Renderer renderer = visual.GetComponent<Renderer>();
-            if (renderer != null)
+            Debug.LogError("EnemySpawner: Enemy prefab is not assigned! Please assign an enemy prefab in the inspector.");
+        }
+        else
+        {
+            // Validate that the prefab has required components
+            if (enemyPrefab.GetComponent<Enemy>() == null && enemyPrefab.GetComponentInChildren<Enemy>() == null)
             {
-                renderer.material.color = Color.red;
+                Debug.LogWarning("EnemySpawner: Enemy prefab doesn't have an Enemy component!");
             }
-
-            enemyPrefab = prefab;
-
-            prefab.SetActive(false);
-
-            Debug.Log("EnemySpawner: Enemy prefab created");
         }
     }
 

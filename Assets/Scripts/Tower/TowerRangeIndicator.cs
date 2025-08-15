@@ -29,6 +29,11 @@ public class TowerRangeIndicator : MonoBehaviour
         }
     }
 
+    public void SetPreviewMode(bool preview)
+    {
+        isPreviewMode = preview;
+    }
+
     private void CreateRangeIndicator()
     {
         // Create range indicator object

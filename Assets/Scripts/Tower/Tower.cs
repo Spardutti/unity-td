@@ -23,6 +23,12 @@ public class Tower : MonoBehaviour
     [SerializeField] private bool showRangeWhenSelected = true;
     [SerializeField] private Color rangeColor = new Color(1f, 1f, 1f, 0.3f);
 
+    [Header("Projectile Settings")]
+    [SerializeField] private bool useProjectiles = true;
+    [SerializeField] private GameObject projectilePrefab;
+    [SerializeField] private Transform projectilesSpawnPoint;
+    [SerializeField] private bool debugProjectiles = false;
+
     private float lastAttackTime;
     private Enemy currentTarget;
     private GridManager gridManager;
@@ -185,14 +191,55 @@ public class Tower : MonoBehaviour
             transform.rotation = Quaternion.Euler(0, targetRotation.eulerAngles.y, 0);
         }
 
-        // Deal Damage
-        currentTarget.TakeDamage(attackDamage);
+
+        FireProjectile();
+
         lastAttackTime = Time.time;
 
-        Debug.Log($"Tower {name} attacked target ({currentTarget.name})");
 
         // Visual Feedback
         StartCoroutine(AttackFlash());
+    }
+
+    private void FireProjectile()
+    {
+        if (projectilePrefab == null)
+        {
+            Debug.LogWarning($"Tower {name} has no projectile prefab assigned");
+            return;
+        }
+        if (projectilesSpawnPoint == null)
+        {
+            Debug.LogWarning($"Tower {name} has no projectiles spawn point assigned");
+            return;
+        }
+
+        if (currentTarget == null) return;
+
+        // Instant damage
+        currentTarget.TakeDamage(attackDamage);
+
+        // Visual projectile
+        Vector3 spawnPosition = projectilesSpawnPoint.position;
+        Vector3 targetPosition = currentTarget.transform.position;
+
+        GameObject newProjectile = Instantiate(projectilePrefab, spawnPosition, Quaternion.identity);
+        Projectile projectileScript = newProjectile.GetComponent<Projectile>();
+
+        if (projectileScript != null)
+        {
+            projectileScript.FireToPosition(targetPosition);
+
+            if (debugProjectiles)
+            {
+                Debug.Log($"Tower {name} fired projectile at target ({currentTarget.name})");
+            }
+        }
+        else
+        {
+            Debug.LogWarning($"Tower {name} could not find projectile script");
+            Destroy(newProjectile);
+        }
     }
 
     private System.Collections.IEnumerator AttackFlash()

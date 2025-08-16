@@ -1,5 +1,36 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &505579505339510778
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8905152759953546328}
+  m_Layer: 0
+  m_Name: ProjectileSpawnPoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8905152759953546328
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 505579505339510778}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 1.5, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 8281117975938767193}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1399804469251493608
 GameObject:
   m_ObjectHideFlags: 0
@@ -122,6 +153,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 698064032411325981}
+  - {fileID: 8905152759953546328}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &3127147920803160564
@@ -146,6 +178,10 @@ MonoBehaviour:
   showRangeIndicator: 1
   showRangeWhenSelected: 1
   rangeColor: {r: 1, g: 1, b: 1, a: 0.3}
+  useProjectiles: 1
+  projectilePrefab: {fileID: 6470800904125922143, guid: bc1e34df42ff77549a10b8e722e0c927, type: 3}
+  projectilesSpawnPoint: {fileID: 8905152759953546328}
+  debugProjectiles: 1
 --- !u!114 &2479403644088941887
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -159,9 +195,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TowerRangeIndicator
   rangeIndicatorPrefab: {fileID: 5124436394569021469, guid: ff2aab32d6ea65c428d3a09478e75696, type: 3}
-  normalRangeColor: {r: 1, g: 0, b: 0.04943371, a: 0.3}
-  placementRangeColor: {r: 1, g: 1, b: 0, a: 0.3}
-  hoverRangeColor: {r: 0, g: 0.5, b: 1, a: 0.4}
 --- !u!136 &5852733087758205737
 CapsuleCollider:
   m_ObjectHideFlags: 0

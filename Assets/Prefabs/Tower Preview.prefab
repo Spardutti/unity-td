@@ -124,6 +124,7 @@ GameObject:
   - component: {fileID: 8281117975938767193}
   - component: {fileID: 2479403644088941887}
   - component: {fileID: 5852733087758205737}
+  - component: {fileID: 7741639798115739805}
   m_Layer: 0
   m_Name: Tower Preview
   m_TagString: Untagged
@@ -159,10 +160,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d06214930bf04714da3360a4c85f0249, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TowerRangeIndicator
-  normalRangeColor: {r: 0, g: 1, b: 0, a: 0.3}
-  placementRangeColor: {r: 1, g: 1, b: 0, a: 0.3}
-  hoverRangeColor: {r: 0, g: 0.5, b: 1, a: 0.4}
-  circleSegments: 32
+  rangeIndicatorPrefab: {fileID: 5124436394569021469, guid: ff2aab32d6ea65c428d3a09478e75696, type: 3}
 --- !u!136 &5852733087758205737
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -186,3 +184,25 @@ CapsuleCollider:
   m_Height: 1
   m_Direction: 1
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &7741639798115739805
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8906526890594277176}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7ccb83996851a4d48ba2212cf3273d0a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Tower
+  attackRange: 3
+  attackDamage: 25
+  attackSpeed: 1
+  towerCost: 50
+  towerColor: {r: 0, g: 0, b: 1, a: 1}
+  towerSize: {x: 0.8, y: 1, z: 0.8}
+  targetingMode: 0
+  showRangeIndicator: 1
+  showRangeWhenSelected: 1
+  rangeColor: {r: 1, g: 1, b: 1, a: 0.3}

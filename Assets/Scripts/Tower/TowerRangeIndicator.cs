@@ -3,13 +3,9 @@ using UnityEngine;
 public class TowerRangeIndicator : MonoBehaviour
 {
     [Header("Range Visualization")]
-    [SerializeField] private Color normalRangeColor = new Color(0f, 1f, 0f, 0.3f);
-    [SerializeField] private Color placementRangeColor = new Color(1f, 1f, 0f, 0.3f);
-    [SerializeField] private Color hoverRangeColor = new Color(0f, 0.5f, 1f, 0.4f);
-    [SerializeField] private int circleSegments = 32;
+    [SerializeField] private GameObject rangeIndicatorPrefab; // Prefab for the range indicator 
 
     private GameObject rangeIndicatorObject;
-    private LineRenderer lineRenderer;
     private Tower tower;
     private bool isVisible = false;
 
@@ -26,69 +22,38 @@ public class TowerRangeIndicator : MonoBehaviour
 
     private void CreateRangeIndicator()
     {
-        // Create range indicator object
-        rangeIndicatorObject = new GameObject("Range Indicator");
-        rangeIndicatorObject.transform.SetParent(transform);
-        rangeIndicatorObject.transform.localPosition = new Vector3(0, 0.1f, 0);
-
-        // Setup LineRenderer
-        lineRenderer = rangeIndicatorObject.AddComponent<LineRenderer>();
-        lineRenderer.material = CreateSimpleMaterial();
-        lineRenderer.startColor = normalRangeColor;
-        lineRenderer.startWidth = 0.1f;
-        lineRenderer.endWidth = 0.1f;
-        lineRenderer.positionCount = circleSegments + 1;
-        lineRenderer.useWorldSpace = false;
-        lineRenderer.loop = true;
-        lineRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-        lineRenderer.receiveShadows = false;
-
-        UpdateCirclePositions();
-    }
-
-    private Material CreateSimpleMaterial()
-    {
-        Material mat = new Material(Shader.Find("Sprites/Default"));
-        mat.color = normalRangeColor;
-        return mat;
-    }
-
-    private void UpdateCirclePositions()
-    {
-        if (lineRenderer == null || tower == null) return;
-
-        float range = tower.AttackRange;
-        Vector3[] positions = new Vector3[circleSegments + 1];
-
-        for (int i = 0; i <= circleSegments; i++)
+        if (rangeIndicatorPrefab == null)
         {
-            float angle = (float)i / circleSegments * 2f * Mathf.PI;
-            positions[i] = new Vector3(
-                Mathf.Cos(angle) * range,
-                0,
-                Mathf.Sin(angle) * range
-            );
+            Debug.LogError("Range Indicator Prefab is not assigned!");
+            return;
         }
 
-        lineRenderer.SetPositions(positions);
+        // Instantiate the prefab
+        rangeIndicatorObject = Instantiate(rangeIndicatorPrefab, transform);
+        rangeIndicatorObject.transform.localPosition = new Vector3(0, 0.1f, 0);
+
+        UpdateRangeScale();
     }
 
-    public void ShowRange(RangeIndicatorType type = RangeIndicatorType.Normal)
+    private void UpdateRangeScale()
+    {
+        if (rangeIndicatorObject == null || tower == null) return;
+
+        float range = tower.AttackRange;
+
+        // Scale the cylinder to match the tower's range
+        // Cylinder default radius is 0.5, so we need range * 2 for diameter
+        rangeIndicatorObject.transform.localScale = new Vector3(range * 2, 0.01f, range * 2);
+    }
+
+    public void ShowRange()
     {
         if (rangeIndicatorObject == null) return;
 
         rangeIndicatorObject.SetActive(true);
         isVisible = true;
 
-        Color targetColor = type switch
-        {
-            RangeIndicatorType.Placement => placementRangeColor,
-            RangeIndicatorType.Hover => hoverRangeColor,
-            _ => normalRangeColor
-        };
-
-        lineRenderer.startColor = targetColor;
-        UpdateCirclePositions();
+        UpdateRangeScale();
     }
 
     public void HideRange()
@@ -104,7 +69,9 @@ public class TowerRangeIndicator : MonoBehaviour
         else ShowRange();
     }
 
-    // For mouse hover - attach this to a collider
+    // Mouse hover is handled by TowerManager to avoid conflicts
+    // Keeping these methods commented out for reference
+    /*
     void OnMouseEnter()
     {
         ShowRange(RangeIndicatorType.Hover);
@@ -114,17 +81,35 @@ public class TowerRangeIndicator : MonoBehaviour
     {
         HideRange();
     }
+    */
 
     void OnDestroy()
     {
         if (rangeIndicatorObject != null)
             DestroyImmediate(rangeIndicatorObject);
     }
+
+    [ContextMenu("Force Show Range")]
+    private void DebugShowRange()
+    {
+        ShowRange();
+        Debug.Log("Force showing range - Check if red cylinder appears");
+    }
+
+    [ContextMenu("Force Hide Range")]
+    private void DebugHideRange()
+    {
+        HideRange();
+        Debug.Log("Force hiding range");
+    }
+
+    [ContextMenu("Log Range Info")]
+    private void DebugLogInfo()
+    {
+        Debug.Log($"Tower range: {(tower != null ? tower.AttackRange.ToString() : "NULL")}");
+        Debug.Log($"Prefab assigned: {(rangeIndicatorPrefab != null ? "YES" : "NO")}");
+        Debug.Log($"Instance created: {(rangeIndicatorObject != null ? "YES" : "NO")}");
+        Debug.Log($"Is visible: {isVisible}");
+    }
 }
 
-public enum RangeIndicatorType
-{
-    Normal,
-    Placement,
-    Hover
-}

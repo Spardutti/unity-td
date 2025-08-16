@@ -117,7 +117,7 @@ public class TowerManager : MonoBehaviour
             if (newHoveredTower != null)
             {
                 TowerRangeIndicator newIndicator = newHoveredTower.GetComponent<TowerRangeIndicator>();
-                newIndicator?.ShowRange(RangeIndicatorType.Hover);
+                newIndicator?.ShowRange();
             }
 
             hoveredTower = newHoveredTower;
@@ -292,13 +292,13 @@ public class TowerManager : MonoBehaviour
     private System.Collections.IEnumerator ShowRangeNextFrame(GameObject towerObj)
     {
         yield return null; // Wait one frame
-        
+
         if (towerObj != null)
         {
             TowerRangeIndicator rangeIndicator = towerObj.GetComponent<TowerRangeIndicator>();
             if (rangeIndicator != null)
             {
-                rangeIndicator.ShowRange(RangeIndicatorType.Placement);
+                rangeIndicator.ShowRange();
             }
         }
     }

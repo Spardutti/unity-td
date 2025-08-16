@@ -29,12 +29,19 @@ public class Tower : MonoBehaviour
     [SerializeField] private Transform projectilesSpawnPoint;
     [SerializeField] private bool debugProjectiles = false;
 
+    [Header("Audio")]
+    [SerializeField] private AudioClip fireSound;
+    [SerializeField] private bool playFireSound = true;
+    [SerializeField] private float soundVolume = 1f;
+
     private float lastAttackTime;
     private Enemy currentTarget;
     private GridManager gridManager;
     private Vector2Int gridPosition;
     private Renderer towerRenderer;
     private List<Enemy> enemiesInRange = new List<Enemy>();
+
+    private AudioSource audioSource;
 
     public float AttackRange => attackRange;
     public float AttackDamage => attackDamage;
@@ -49,10 +56,16 @@ public class Tower : MonoBehaviour
     {
         gridManager = FindFirstObjectByType<GridManager>();
         towerRenderer = GetComponent<Renderer>();
+        audioSource = GetComponent<AudioSource>();
 
         if (towerRenderer == null)
         {
             towerRenderer = GetComponent<Renderer>();
+        }
+
+        if (audioSource == null)
+        {
+            Debug.LogWarning($"Tower {name} has no audio source");
         }
     }
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -219,6 +232,8 @@ public class Tower : MonoBehaviour
         // Instant damage
         currentTarget.TakeDamage(attackDamage);
 
+        PlayFireSound();
+
         // Visual projectile
         Vector3 spawnPosition = projectilesSpawnPoint.position;
         Vector3 targetPosition = currentTarget.transform.position;
@@ -240,6 +255,38 @@ public class Tower : MonoBehaviour
             Debug.LogWarning($"Tower {name} could not find projectile script");
             Destroy(newProjectile);
         }
+    }
+
+    private void PlayFireSound()
+    {
+        Debug.Log($"Tower {name}: PlayFireSound called");
+        Debug.Log($"Tower {name}: playFireSound = {playFireSound}");
+        Debug.Log($"Tower {name}: fireSound = {(fireSound != null ? fireSound.name : "NULL")}");
+        Debug.Log($"Tower {name}: audioSource = {(audioSource != null ? "EXISTS" : "NULL")}");
+
+        if (!playFireSound)
+        {
+            Debug.LogWarning($"Tower {name}: Fire sound is disabled in settings");
+            return;
+        }
+
+        if (fireSound == null)
+        {
+            Debug.LogWarning($"Tower {name}: No fire sound clip assigned");
+            return;
+        }
+
+        if (audioSource == null)
+        {
+            Debug.LogWarning($"Tower {name}: No AudioSource component found");
+            return;
+        }
+
+        Debug.Log($"Tower {name}: All checks passed, playing sound");
+        audioSource.clip = fireSound;
+        audioSource.volume = soundVolume;
+        audioSource.Play();
+        Debug.Log($"Tower {name}: Sound played successfully");
     }
 
     private System.Collections.IEnumerator AttackFlash()

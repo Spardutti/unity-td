@@ -259,10 +259,12 @@ public class TowerManager : MonoBehaviour
         previewTower = Instantiate(prefabToUse);
         previewTower.name = "Tower Preview";
 
-        // Disable the tower script on preview
+        // Disable the tower script on preview but apply its size
         Tower towerScript = previewTower.GetComponent<Tower>();
         if (towerScript != null)
         {
+            // Apply the tower size before disabling
+            previewTower.transform.localScale = new Vector3(0.8f, 1f, 0.8f);
             towerScript.enabled = false;
         }
 

@@ -170,6 +170,16 @@ public class Enemy : MonoBehaviour
     {
         Debug.Log($"Enemy died! Reward: {goldReward}");
 
+        // Award gold to player
+        if (EconomyManager.Instance != null)
+        {
+            EconomyManager.Instance.AddGold(goldReward);
+        }
+        else
+        {
+            Debug.LogError("Enemy: EconomyManager not found");
+        }
+
         DestroyEnemy();
     }
 

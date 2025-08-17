@@ -31,6 +31,7 @@ public class Enemy : MonoBehaviour
     public float HealthPercentage => currentHeath / maxHealth;
     public bool IsAlive => currentHeath > 0;
     public int GoldReward => goldReward;
+    public int AttackDamage => attackDamage;
 
     void Awake()
     {
@@ -146,16 +147,6 @@ public class Enemy : MonoBehaviour
     private void ReachPathEnd()
     {
         Debug.Log(" Enemy reached end of path");
-
-
-        if (PlayerHealthManager.instance != null)
-        {
-            PlayerHealthManager.instance.TakeDamage(attackDamage);
-        }
-        else
-        {
-            Debug.LogError("Enemy: PlayerHealthManager not found");
-        }
 
         DestroyEnemy();
     }

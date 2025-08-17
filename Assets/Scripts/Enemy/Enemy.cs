@@ -7,6 +7,7 @@ public class Enemy : MonoBehaviour
     [SerializeField] private float maxHealth = 100f;
     [SerializeField] private float moveSpeed = 2f;
     [SerializeField] private int goldReward = 10;
+    [SerializeField] private int attackDamage = 1;
 
     [Header("Visual Settings")]
     [SerializeField] private Color enemyColor = Color.red;
@@ -145,6 +146,16 @@ public class Enemy : MonoBehaviour
     private void ReachPathEnd()
     {
         Debug.Log(" Enemy reached end of path");
+
+
+        if (PlayerHealthManager.instance != null)
+        {
+            PlayerHealthManager.instance.TakeDamage(attackDamage);
+        }
+        else
+        {
+            Debug.LogError("Enemy: PlayerHealthManager not found");
+        }
 
         DestroyEnemy();
     }

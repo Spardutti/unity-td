@@ -316,11 +316,29 @@ public class TowerManager : MonoBehaviour
         previewTower.transform.position = new Vector3(snapPosition.x, 0.5f, snapPosition.z);
 
         // Change color based on whether placement is valid
-        bool canPlace = CanPlaceTowerAt(gridPos);
-        Renderer renderer = previewTower.GetComponent<Renderer>();
+        bool canPlaceOnGrid = CanPlaceTowerAt(gridPos);
+        bool hasEnoughGold = EconomyManager.Instance?.HasEnoughGold(towerPrefab.GetComponent<Tower>().TowerCost) ?? false;
+
+        // Try to find renderer in children
+        Renderer renderer = previewTower.GetComponentInChildren<Renderer>();
+
         if (renderer != null)
         {
-            Color color = canPlace ? Color.green : Color.red;
+            Debug.Log($"TowerManager: CanPlace: {canPlaceOnGrid}, HasEnoughGold: {hasEnoughGold}");
+            Color color;
+            if (!canPlaceOnGrid)
+            {
+                color = Color.red;
+            }
+            else if (!hasEnoughGold)
+            {
+                color = Color.yellow;
+            }
+            else
+            {
+                color = Color.green;
+            }
+            Debug.Log($"TowerManager: Preview tower color: {color}");
             color.a = 0.5f;
             renderer.material.color = color;
         }
@@ -348,13 +366,38 @@ public class TowerManager : MonoBehaviour
         Vector3 mouseWorldPos = GetMouseWorldPosition();
         Vector2Int gridPos = gridManager.WorldToGrid(mouseWorldPos);
 
-        if (CanPlaceTowerAt(gridPos))
+        if (!CanPlaceTowerAt(gridPos))
         {
-            PlaceTower(gridPos);
+            Debug.Log("TowerManager: Cannot place tower at this location");
+            return;
+        }
+
+        // Check if player has enough gold
+        Tower towerComponent = towerPrefab.GetComponent<Tower>();
+        if (towerComponent != null)
+        {
+            int towerCost = towerComponent.TowerCost;
+
+            if (EconomyManager.Instance == null)
+            {
+                Debug.LogError("TowerManager: EconomyManager not found");
+                return;
+            }
+
+            if (!EconomyManager.Instance.HasEnoughGold(towerCost))
+            {
+                Debug.Log($"TowerManager: Cannot place tower, not enough gold ({towerCost} needed)");
+                return;
+            }
+
+            if (EconomyManager.Instance.TryToSpendGold(towerCost))
+            {
+                PlaceTower(gridPos);
+            }
         }
         else
         {
-            Debug.Log("TowerManager: Cannot place tower at this location");
+            Debug.LogError("TowerManager: Tower prefab doesn't have a Tower component!");
         }
     }
 

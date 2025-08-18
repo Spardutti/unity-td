@@ -9,6 +9,7 @@ public class TowerManager : MonoBehaviour
     [SerializeField] private GameObject towerPrefab;
     [SerializeField] private GameObject towerPreviewPrefab; // Optional separate preview prefab
     [SerializeField] private Transform towerParent;
+    [SerializeField] private TowerData[] availableTowers;
 
     [Header("Placement Settings")]
     [SerializeField] private LayerMask groundLayerMask = 1; // Default layer
@@ -33,6 +34,7 @@ public class TowerManager : MonoBehaviour
     private int towersBuilt = 0;
 
     private Tower hoveredTower;
+    private TowerData selectedTowerData;
 
     // Public properties
     public int TowersBuilt => towersBuilt;
@@ -126,27 +128,21 @@ public class TowerManager : MonoBehaviour
 
     private void ValidateTowerPrefab()
     {
-        if (towerPrefab == null)
+        if (availableTowers == null || availableTowers.Length == 0)  // CHANGE THIS SECTION
         {
-            Debug.LogError("TowerManager: Tower prefab is not assigned! Please assign a tower prefab in the inspector.");
-        }
-        else
-        {
-            // Validate that the prefab has required components
-            if (towerPrefab.GetComponent<Tower>() == null)
-            {
-                Debug.LogWarning("TowerManager: Tower prefab doesn't have a Tower component!");
-            }
-            if (towerPrefab.GetComponent<TowerRangeIndicator>() == null)
-            {
-                Debug.LogWarning("TowerManager: Tower prefab doesn't have a TowerRangeIndicator component!");
-            }
+            Debug.LogError("TowerManager: No tower data assigned! Please assign tower data in the inspector.");
+            return;
         }
 
-        // If no separate preview prefab is assigned, we'll use the main tower prefab
-        if (towerPreviewPrefab == null)
+        foreach (TowerData towerData in availableTowers)
         {
-            Debug.Log("TowerManager: No separate preview prefab assigned, will use main tower prefab for preview.");
+            if (towerData?.towerPrefab != null)
+            {
+                if (towerData.towerPrefab.GetComponent<Tower>() == null)
+                {
+                    Debug.LogWarning($"TowerManager: {towerData.towerName} prefab doesn't have a Tower component!");
+                }
+            }
         }
     }
 
@@ -208,9 +204,11 @@ public class TowerManager : MonoBehaviour
         }
     }
 
-    public void StartPlacementMode()
+    public void StartPlacementMode(TowerData towerData = null)
     {
-        if (towerPrefab == null)
+        selectedTowerData = towerData ?? (availableTowers?.Length > 0 ? availableTowers[0] : null);
+
+        if (selectedTowerData?.towerPrefab == null)
         {
             Debug.LogWarning("TowerManager: No tower prefab available");
             return;
@@ -254,8 +252,8 @@ public class TowerManager : MonoBehaviour
             DestroyImmediate(previewTower);
         }
 
-        // Use preview prefab if available, otherwise use main tower prefab
-        GameObject prefabToUse = towerPreviewPrefab != null ? towerPreviewPrefab : towerPrefab;
+        // Use the selected tower's prefab
+        GameObject prefabToUse = selectedTowerData.towerPrefab;
         previewTower = Instantiate(prefabToUse);
         previewTower.name = "Tower Preview";
 
@@ -408,15 +406,15 @@ public class TowerManager : MonoBehaviour
 
     private void PlaceTower(Vector2Int gridPos)
     {
-        if (towerPrefab == null) return;
+        if (selectedTowerData?.towerPrefab == null) return;
 
         Vector3 worldPos = gridManager.GridToWorld(gridPos);
         Vector3 spawnPos = new Vector3(worldPos.x, 0.5f, worldPos.z);
 
         // Ensure tower spawns with no rotation (upright)
-        GameObject newTower = Instantiate(towerPrefab, spawnPos, Quaternion.Euler(0, 0, 0), towerParent);
+        GameObject newTower = Instantiate(selectedTowerData.towerPrefab, spawnPos, Quaternion.Euler(0, 0, 0), towerParent);
         newTower.SetActive(true);
-        newTower.name = $"Tower_{towersBuilt:000}";
+        newTower.name = $"{selectedTowerData.towerName}_{towersBuilt:000}";
 
         Tower towerComponent = newTower.GetComponent<Tower>();
         if (towerComponent != null)

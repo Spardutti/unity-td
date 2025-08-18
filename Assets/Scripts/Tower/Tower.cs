@@ -4,12 +4,8 @@ using System.Collections.Generic;
 public class Tower : MonoBehaviour
 {
 
-    [Header("Tower Stats")]
-    [SerializeField] private float attackRange = 3f;
-    [SerializeField] private float attackDamage = 25f;
-    [SerializeField] private float attackSpeed = 1f; // per second
-    [SerializeField] private int towerCost = 50;
-
+    [Header("Tower Configuration")]
+    [SerializeField] private TowerData towerData;
 
     [Header("Visual Settings")]
     [SerializeField] private Color towerColor = Color.blue;
@@ -43,13 +39,13 @@ public class Tower : MonoBehaviour
 
     private AudioSource audioSource;
 
-    public float AttackRange => attackRange;
-    public float AttackDamage => attackDamage;
-    public float AttackSpeed => attackSpeed;
-    public int TowerCost => towerCost;
-    public Vector2Int GridPosition => gridPosition;
-    public Enemy CurrentTarget => currentTarget;
-    public bool HasTarget => currentTarget != null;
+    public float AttackRange => towerData?.range ?? 3f;
+    public float AttackDamage => towerData?.damage ?? 25f;
+    public float AttackSpeed => towerData?.fireRate ?? 1f;
+    public int TowerCost => towerData?.cost ?? 50;
+    public TowerData TowerData => towerData;
+    public AttackType AttackType => towerData?.attackType ?? AttackType.Single;
+    public float SplashRadius => towerData?.splashRadius ?? 0f;
 
 
     void Awake()
@@ -72,6 +68,7 @@ public class Tower : MonoBehaviour
     void Start()
     {
         SetupVisuals();
+        InitializeTowerData();
         SnapToGrid();
         RegisterWithGrid();
     }
@@ -85,6 +82,23 @@ public class Tower : MonoBehaviour
         if (CanAttack())
         {
             AttackTarget();
+        }
+    }
+
+    private void InitializeTowerData()
+    {
+        if (towerData != null)
+        {
+            // Set targeting mode from data
+            targetingMode = towerData.defaultTargetingMode;
+
+            // Update any audio clips
+            if (towerData.fireSound != null)
+            {
+                fireSound = towerData.fireSound;
+            }
+
+            Debug.Log($"Tower initialized with {towerData.GetLevelDisplayName()}");
         }
     }
 
@@ -130,7 +144,7 @@ public class Tower : MonoBehaviour
             if (enemy != null && enemy.IsAlive)
             {
                 float distance = Vector3.Distance(transform.position, enemy.transform.position);
-                if (distance <= attackRange)
+                if (distance <= AttackRange)
                 {
                     enemiesInRange.Add(enemy);
                 }
@@ -177,10 +191,10 @@ public class Tower : MonoBehaviour
         return targetingMode switch
         {
             TargetingMode.Closest => Vector3.Distance(transform.position, enemy.transform.position),
-            TargetingMode.Furthest => Vector3.Distance(transform.position, enemy.transform.position),
+            TargetingMode.Furthest => -Vector3.Distance(transform.position, enemy.transform.position),
             TargetingMode.LowestHealth => enemy.CurrentHealth,
-            TargetingMode.HighestHealth => enemy.CurrentHealth,
-            TargetingMode.MostProgress => enemy.GetPathProgress(),
+            TargetingMode.HighestHealth => -enemy.CurrentHealth,
+            TargetingMode.MostProgress => -enemy.GetPathProgress(),
             TargetingMode.LeastProgress => enemy.GetPathProgress(),
             _ => Vector3.Distance(transform.position, enemy.transform.position)
         };
@@ -230,7 +244,7 @@ public class Tower : MonoBehaviour
         if (currentTarget == null) return;
 
         // Instant damage
-        currentTarget.TakeDamage(attackDamage);
+        currentTarget.TakeDamage(AttackDamage);
 
         PlayFireSound();
 
@@ -302,19 +316,53 @@ public class Tower : MonoBehaviour
         }
     }
 
-    public void UpgradeTower(float damageIncrease, float rangeIncrease, float speedIncrease)
+    public bool CanUpgrade()
     {
-        attackDamage += damageIncrease;
-        attackRange += rangeIncrease;
-        attackSpeed += speedIncrease;
+        return towerData != null && towerData.CanBeUpgraded;
+    }
 
-        Debug.Log($"Tower {name} upgraded to tower with attack damage {attackDamage}, attack range {attackRange}, attack speed {attackSpeed}");
+    public bool UpgradeTower()
+    {
+        if (!CanUpgrade()) return false;
+
+        TowerData newData = towerData.nextUpgrade;
+        if (newData == null) return false;
+
+        towerData = newData;
+
+        // Update visuals if needed
+        UpdateTowerVisuals();
+
+        Debug.Log($"Tower {name} upgraded to {towerData.GetLevelDisplayName()}");
+        return true;
+    }
+
+    private void UpdateTowerVisuals()
+    {
+        if (towerData == null) return;
+
+        // Update scale if specified
+        if (towerData.levelScales != null && towerData.upgradeLevel <= towerData.levelScales.Length)
+        {
+            float scale = towerData.levelScales[towerData.upgradeLevel - 1];
+            transform.localScale = towerSize * scale;
+        }
+
+        // Update material if specified
+        if (towerData.levelMaterials != null && towerData.upgradeLevel <= towerData.levelMaterials.Length)
+        {
+            Material newMaterial = towerData.levelMaterials[towerData.upgradeLevel - 1];
+            if (towerRenderer != null && newMaterial != null)
+            {
+                towerRenderer.material = newMaterial;
+            }
+        }
     }
 
     // Method to get tower info for UI
     public string GetTowerInfo()
     {
-        return $"Damage: {attackDamage:F1}, Range: {attackRange:F1}, Speed: {attackSpeed:F1}";
+        return $"Damage: {AttackDamage:F1}, Range: {AttackRange:F1}, Speed: {AttackSpeed:F1}";
     }
 
     void OnDrawGizmos()
@@ -336,10 +384,10 @@ public class Tower : MonoBehaviour
     private void DrawRangeGizmo()
     {
         Gizmos.color = rangeColor;
-        Gizmos.DrawSphere(transform.position, attackRange);
+        Gizmos.DrawSphere(transform.position, AttackRange);
 
         Gizmos.color = new Color(rangeColor.r, rangeColor.g, rangeColor.b, 1f);
-        Gizmos.DrawWireSphere(transform.position, attackRange);
+        Gizmos.DrawWireSphere(transform.position, AttackRange);
     }
 
     void OnDestroy()

@@ -12,21 +12,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f097f7c36adf48b458b9f5b8b06f4b74, type: 3}
   m_Name: CannonTower_Level1
   m_EditorClassIdentifier: Assembly-CSharp::TowerData
-  towerName: Basic Tower
-  description: Standard arrow tower
+  towerName: Cannon Tower
+  description: Heavy artillery that deals area damage
   towerIcon: {fileID: 0}
-  damage: 10
-  range: 5
-  fireRate: 1
-  cost: 50
-  attackType: 0
+  damage: 40
+  range: 4
+  fireRate: 0.5
+  cost: 100
+  attackType: 1
   defaultTargetingMode: 0
-  splashRadius: 0
+  splashRadius: 2
   upgradeLevel: 1
   maxUpgradeLevel: 3
   nextUpgrade: {fileID: 0}
   upgradeCost: 75
-  towerPrefab: {fileID: 0}
+  towerPrefab: {fileID: 5591582020968000744, guid: d7ad520b853240640a4be71c2d1fa127, type: 3}
   projectilePrefab: {fileID: 0}
   muzzleFlashEffect: {fileID: 0}
   fireSound: {fileID: 0}

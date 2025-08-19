@@ -17,10 +17,8 @@ public class Tower : MonoBehaviour
     [Header("Range Visualization")]
     [SerializeField] private bool showRangeIndicator = true;
     [SerializeField] private bool showRangeWhenSelected = true;
-    [SerializeField] private Color rangeColor = new Color(1f, 1f, 1f, 0.3f);
 
     [Header("Projectile Settings")]
-    [SerializeField] private bool useProjectiles = true;
     [SerializeField] private GameObject projectilePrefab;
     [SerializeField] private Transform projectilesSpawnPoint;
     [SerializeField] private bool debugProjectiles = false;
@@ -365,30 +363,11 @@ public class Tower : MonoBehaviour
         return $"Damage: {AttackDamage:F1}, Range: {AttackRange:F1}, Speed: {AttackSpeed:F1}";
     }
 
-    void OnDrawGizmos()
-    {
-        if (showRangeIndicator)
-        {
-            DrawRangeGizmo();
-        }
-    }
 
-    void OawGizmosSelected()
-    {
-        if (showRangeWhenSelected)
-        {
-            DrawRangeGizmo();
-        }
-    }
 
-    private void DrawRangeGizmo()
-    {
-        Gizmos.color = rangeColor;
-        Gizmos.DrawSphere(transform.position, AttackRange);
 
-        Gizmos.color = new Color(rangeColor.r, rangeColor.g, rangeColor.b, 1f);
-        Gizmos.DrawWireSphere(transform.position, AttackRange);
-    }
+
+
 
     void OnDestroy()
     {

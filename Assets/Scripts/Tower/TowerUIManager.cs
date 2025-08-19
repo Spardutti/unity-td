@@ -104,7 +104,7 @@ public class TowerUIManager : MonoBehaviour
             TextMeshProUGUI buttonText = placeTowerButton.GetComponentInChildren<TextMeshProUGUI>();
             if (buttonText != null)
             {
-                buttonText.text = towerManager.IsPlacementMode ? "Placing..." : "Place Tower (T)";
+                buttonText.text = "Buy Tower";
             }
 
             // Change button color based on mode
@@ -120,9 +120,17 @@ public class TowerUIManager : MonoBehaviour
 
     private void OnPlaceTowerButtonClicked()
     {
-        if (towerManager != null)
+
+
+        TowerSelectionUI towerSelection = FindFirstObjectByType<TowerSelectionUI>(FindObjectsInactive.Include);
+
+        if (towerSelection != null)
         {
-            towerManager.TogglePlacementMode();
+            towerSelection.ShowPanel();
+        }
+        else
+        {
+            Debug.LogError("TowerSelectionUI component not found!");
         }
     }
 

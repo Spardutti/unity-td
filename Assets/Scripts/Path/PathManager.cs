@@ -12,7 +12,6 @@ public class PathManager : MonoBehaviour
     [Header("Visual Settings")]
     [SerializeField] private bool showPath = true;
     [SerializeField] private Color pathLineColor = Color.red;
-    [SerializeField] private float pathLineWidth = 0.1f;
 
     [Header("Grid Integration")]
     [SerializeField] private bool markPathCellsOnGrid = true;

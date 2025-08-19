@@ -6,13 +6,10 @@ using System.Collections.Generic;
 public class TowerManager : MonoBehaviour
 {
     [Header("Tower Settings")]
-    [SerializeField] private GameObject towerPrefab;
-    [SerializeField] private GameObject towerPreviewPrefab; // Optional separate preview prefab
     [SerializeField] private Transform towerParent;
     [SerializeField] private TowerData[] availableTowers;
 
     [Header("Placement Settings")]
-    [SerializeField] private LayerMask groundLayerMask = 1; // Default layer
     [SerializeField] private Material previewMaterial;
     [SerializeField] private bool showPlacementPreview = true;
 
@@ -206,9 +203,10 @@ public class TowerManager : MonoBehaviour
 
     public void StartPlacementMode(TowerData towerData = null)
     {
-        selectedTowerData = towerData ?? (availableTowers?.Length > 0 ? availableTowers[0] : null);
+        selectedTowerData = towerData != null ? towerData : (availableTowers?.Length > 0 ? availableTowers[0] : null);
 
-        if (selectedTowerData?.towerPrefab == null)
+
+        if (selectedTowerData == null || selectedTowerData.towerPrefab == null)
         {
             Debug.LogWarning("TowerManager: No tower prefab available");
             return;
@@ -245,7 +243,7 @@ public class TowerManager : MonoBehaviour
 
     private void CreatePlacementPreview()
     {
-        if (!showPlacementPreview || towerPrefab == null) return;
+        if (!showPlacementPreview || selectedTowerData == null || selectedTowerData.towerPrefab == null) return;
 
         if (previewTower != null)
         {
@@ -315,7 +313,7 @@ public class TowerManager : MonoBehaviour
 
         // Change color based on whether placement is valid
         bool canPlaceOnGrid = CanPlaceTowerAt(gridPos);
-        bool hasEnoughGold = EconomyManager.Instance?.HasEnoughGold(towerPrefab.GetComponent<Tower>().TowerCost) ?? false;
+        bool hasEnoughGold = EconomyManager.Instance?.HasEnoughGold(selectedTowerData.cost) ?? false;
 
         // Try to find renderer in children
         Renderer renderer = previewTower.GetComponentInChildren<Renderer>();
@@ -371,32 +369,25 @@ public class TowerManager : MonoBehaviour
         }
 
         // Check if player has enough gold
-        Tower towerComponent = towerPrefab.GetComponent<Tower>();
-        if (towerComponent != null)
+        int towerCost = selectedTowerData.cost;
+
+        if (EconomyManager.Instance == null)
         {
-            int towerCost = towerComponent.TowerCost;
-
-            if (EconomyManager.Instance == null)
-            {
-                Debug.LogError("TowerManager: EconomyManager not found");
-                return;
-            }
-
-            if (!EconomyManager.Instance.HasEnoughGold(towerCost))
-            {
-                Debug.Log($"TowerManager: Cannot place tower, not enough gold ({towerCost} needed)");
-                return;
-            }
-
-            if (EconomyManager.Instance.TryToSpendGold(towerCost))
-            {
-                PlaceTower(gridPos);
-            }
+            Debug.LogError("TowerManager: EconomyManager not found");
+            return;
         }
-        else
+
+        if (!EconomyManager.Instance.HasEnoughGold(towerCost))
         {
-            Debug.LogError("TowerManager: Tower prefab doesn't have a Tower component!");
+            Debug.Log($"TowerManager: Cannot place tower, not enough gold ({towerCost} needed)");
+            return;
         }
+
+        if (EconomyManager.Instance.TryToSpendGold(towerCost))
+        {
+            PlaceTower(gridPos);
+        }
+
     }
 
     private bool CanPlaceTowerAt(Vector2Int gridPos)

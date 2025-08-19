@@ -7,10 +7,6 @@ public class TerrainVisualManager : MonoBehaviour
     [SerializeField] private GameObject pathTilePrefab;
     [SerializeField] private GameObject buildableTilePrefab;
 
-    [Header("3D Settings")]
-    [SerializeField] private float tileHeight = 0.1f;
-    [SerializeField] private bool castShadows = false;
-
     private GridManager gridManager;
     private PathManager pathManager;
     private Transform tilesParent;
@@ -142,7 +138,7 @@ public class TerrainVisualManager : MonoBehaviour
     private GameObject CreateTileGameObject(int gridX, int gridY, CellType cellType)
     {
         GameObject prefabToUse = GetPrefabForCellType(cellType);
-        
+
         if (prefabToUse == null)
         {
             Debug.LogError($"TerrainVisualManager: No prefab assigned for cell type {cellType} at ({gridX}, {gridY})!");

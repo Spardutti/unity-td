@@ -12,10 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f097f7c36adf48b458b9f5b8b06f4b74, type: 3}
   m_Name: ArcherTower_Level1
   m_EditorClassIdentifier: Assembly-CSharp::TowerData
-  towerName: Basic Tower
+  towerName: Archer Tower
   description: Standard arrow tower
   towerIcon: {fileID: 0}
-  damage: 10
+  damage: 25
   range: 5
   fireRate: 1
   cost: 50
@@ -26,10 +26,10 @@ MonoBehaviour:
   maxUpgradeLevel: 3
   nextUpgrade: {fileID: 0}
   upgradeCost: 75
-  towerPrefab: {fileID: 0}
-  projectilePrefab: {fileID: 0}
+  towerPrefab: {fileID: 8906526890594277176, guid: 0dd17ae4e58222b49a9514edf8920d9d, type: 3}
+  projectilePrefab: {fileID: 6470800904125922143, guid: bc1e34df42ff77549a10b8e722e0c927, type: 3}
   muzzleFlashEffect: {fileID: 0}
-  fireSound: {fileID: 0}
+  fireSound: {fileID: 8300000, guid: b311e406cafcf304db37cfbece90984a, type: 3}
   placementSound: {fileID: 0}
   upgradeSound: {fileID: 0}
   levelMaterials: []

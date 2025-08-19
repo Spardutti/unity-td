@@ -1,6 +1,5 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
-using System.Collections;
 using System.Collections.Generic;
 
 public class TowerManager : MonoBehaviour
@@ -264,18 +263,31 @@ public class TowerManager : MonoBehaviour
             towerScript.enabled = false;
         }
 
-        // Make it semi-transparent
-        Renderer renderer = previewTower.GetComponent<Renderer>();
-        if (renderer != null && previewMaterial != null)
+        // Make it semi-transparent using the tower's existing materials
+        Renderer[] renderers = previewTower.GetComponentsInChildren<Renderer>();
+        foreach (Renderer renderer in renderers)
         {
-            renderer.material = previewMaterial;
-        }
-        else if (renderer != null)
-        {
-            Material mat = renderer.material;
-            Color color = mat.color;
-            color.a = 0.5f;
-            mat.color = color;
+            // Create instances of the materials to avoid modifying the original prefab
+            Material[] materials = renderer.materials;
+            for (int i = 0; i < materials.Length; i++)
+            {
+                materials[i] = new Material(materials[i]);
+                // Enable transparency
+                materials[i].SetFloat("_Mode", 3); // Set to Transparent mode
+                materials[i].SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
+                materials[i].SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+                materials[i].SetInt("_ZWrite", 0);
+                materials[i].DisableKeyword("_ALPHATEST_ON");
+                materials[i].EnableKeyword("_ALPHABLEND_ON");
+                materials[i].DisableKeyword("_ALPHAPREMULTIPLY_ON");
+                materials[i].renderQueue = 3000;
+                
+                // Set transparency
+                Color color = materials[i].color;
+                color.a = 0.5f;
+                materials[i].color = color;
+            }
+            renderer.materials = materials;
         }
 
         previewTower.SetActive(true);
@@ -315,28 +327,31 @@ public class TowerManager : MonoBehaviour
         bool canPlaceOnGrid = CanPlaceTowerAt(gridPos);
         bool hasEnoughGold = EconomyManager.Instance?.HasEnoughGold(selectedTowerData.cost) ?? false;
 
-        // Try to find renderer in children
-        Renderer renderer = previewTower.GetComponentInChildren<Renderer>();
-
-        if (renderer != null)
+        // Update all renderers in the preview
+        Renderer[] renderers = previewTower.GetComponentsInChildren<Renderer>();
+        
+        foreach (Renderer renderer in renderers)
         {
-            Debug.Log($"TowerManager: CanPlace: {canPlaceOnGrid}, HasEnoughGold: {hasEnoughGold}");
-            Color color;
+            Color tintColor;
             if (!canPlaceOnGrid)
             {
-                color = Color.red;
+                tintColor = Color.red;
             }
             else if (!hasEnoughGold)
             {
-                color = Color.yellow;
+                tintColor = Color.yellow;
             }
             else
             {
-                color = Color.green;
+                tintColor = Color.green;
             }
-            Debug.Log($"TowerManager: Preview tower color: {color}");
-            color.a = 0.5f;
-            renderer.material.color = color;
+            tintColor.a = 0.5f;
+            
+            // Apply tint to all materials
+            foreach (Material mat in renderer.materials)
+            {
+                mat.color = tintColor;
+            }
         }
     }
 

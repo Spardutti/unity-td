@@ -50,7 +50,7 @@ public class Tower : MonoBehaviour
     void Awake()
     {
         gridManager = FindFirstObjectByType<GridManager>();
-        towerRenderer = GetComponent<Renderer>();
+        towerRenderer = GetComponentInChildren<Renderer>();
         audioSource = GetComponent<AudioSource>();
 
         if (towerRenderer == null)

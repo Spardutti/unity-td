@@ -1,14 +1,10 @@
 using UnityEngine;
-using UnityEngine.UI;
 
 public class EnemySpawner : MonoBehaviour
 {
     [Header("Spawning")]
     [SerializeField] private GameObject enemyPrefab;
     [SerializeField] private Transform spawnParent;
-
-    [Header("UI References")]
-    [SerializeField] private Button spawnButton;
 
     [Header("Spawn Settings")]
     [SerializeField] private Vector3 spawnOffset = Vector3.up * 0.5f;
@@ -42,23 +38,11 @@ public class EnemySpawner : MonoBehaviour
             Debug.LogWarning("EnemySpawner: Removing Enemy component from spawner GameObject!");
             DestroyImmediate(enemyComponent);
         }
-        
-        SetupUI();
+
         ValidateEnemyPrefab();
     }
 
-    private void SetupUI()
-    {
-        if (spawnButton != null)
-        {
-            spawnButton.onClick.AddListener(SpawnEnemy);
-            Debug.Log($"EnemySpawner: Spawn button connected");
-        }
-        else
-        {
-            Debug.LogWarning("EnemySpawner: Spawn button not found");
-        }
-    }
+
 
     private void ValidateEnemyPrefab()
     {

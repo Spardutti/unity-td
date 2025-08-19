@@ -153,57 +153,35 @@ public class PathManager : MonoBehaviour
     private List<Vector2Int> GetLineBetweenPoints(Vector2Int start, Vector2Int end)
     {
         List<Vector2Int> line = new List<Vector2Int>();
-        int x0 = start.x, y0 = start.y;
-        int x1 = end.x, y1 = end.y;
 
-        if (x0 == x1) // Vertical line
+        // Always move horizontally first, then vertically
+        // This creates proper L-shaped paths instead of diagonal shortcuts
+        int currentX = start.x;
+        int currentY = start.y;
+
+        // Add starting point
+        line.Add(new Vector2Int(currentX, currentY));
+
+        // Move horizontally first
+        while (currentX != end.x)
         {
-            int minY = Mathf.Min(y0, y1);
-            int maxY = Mathf.Max(y0, y1);
+            if (currentX < end.x)
+                currentX++;
+            else
+                currentX--;
 
-            for (int y = minY; y <= maxY; y++)
-            {
-                line.Add(new Vector2Int(x0, y));
-            }
-            return line;
+            line.Add(new Vector2Int(currentX, currentY));
         }
 
-        if (y0 == y1) // Horizontal line
+        // Then move vertically
+        while (currentY != end.y)
         {
-            int minX = Mathf.Min(x0, x1);
-            int maxX = Mathf.Max(x0, x1);
+            if (currentY < end.y)
+                currentY++;
+            else
+                currentY--;
 
-            for (int x = minX; x <= maxX; x++)
-            {
-                line.Add(new Vector2Int(x, y0));
-            }
-            return line;
-        }
-
-        // Bresenham's line algorithm for diagonal lines
-        int dx = Mathf.Abs(x1 - x0);
-        int dy = Mathf.Abs(y1 - y0);
-        int sx = x0 < x1 ? 1 : -1;
-        int sy = y0 < y1 ? 1 : -1;
-        int err = dx - dy;
-
-        while (true)
-        {
-            line.Add(new Vector2Int(x0, y0));
-
-            if (x0 == x1 && y0 == y1) break;
-
-            int e2 = 2 * err;
-            if (e2 > -dy)
-            {
-                err -= dy;
-                x0 += sx;
-            }
-            if (e2 < dx)
-            {
-                err += dx;
-                y0 += sy;
-            }
+            line.Add(new Vector2Int(currentX, currentY));
         }
 
         return line;

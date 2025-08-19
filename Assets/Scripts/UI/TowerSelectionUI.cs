@@ -9,6 +9,7 @@ public class TowerSelectionUI : MonoBehaviour
     [SerializeField] private Button archerButton;
     [SerializeField] private Button cannonButton;
     [SerializeField] private Button closeButton;
+    [SerializeField] private Button placeTowerButton;
 
     [Header("Tower Data")]
     [SerializeField] private TowerData archerTowerData;
@@ -40,6 +41,11 @@ public class TowerSelectionUI : MonoBehaviour
             cannonButton.onClick.AddListener(() => SelectTower(cannonTowerData));
         }
 
+        if (placeTowerButton != null)
+        {
+            placeTowerButton.onClick.AddListener(ShowPanel);
+        }
+
         if (closeButton != null)
         {
             closeButton.onClick.AddListener(HidePanel);
@@ -63,7 +69,7 @@ public class TowerSelectionUI : MonoBehaviour
             TextMeshProUGUI buttonText = archerButton.GetComponentInChildren<TextMeshProUGUI>();
             if (buttonText != null)
             {
-                buttonText.text = $"Archer\n{archerTowerData.cost}";
+                buttonText.text = $"Archer - {archerTowerData.cost}$";
             }
         }
 
@@ -72,7 +78,7 @@ public class TowerSelectionUI : MonoBehaviour
             TextMeshProUGUI buttonText = cannonButton.GetComponentInChildren<TextMeshProUGUI>();
             if (buttonText != null)
             {
-                buttonText.text = $"Cannon\n{cannonTowerData.cost}";
+                buttonText.text = $"Cannon - {cannonTowerData.cost}$";
             }
         }
     }

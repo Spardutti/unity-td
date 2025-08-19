@@ -27,7 +27,6 @@ public class Waypoint : MonoBehaviour
         if (gridManager != null)
         {
             Vector2Int gridCoors = GridUtility.GetGridPosition(transform, gridManager);
-            Debug.Log($"Waypoint {waypointOrder} snapped to grid cell ({gridCoors.x}, {gridCoors.y})");
         }
     }
 

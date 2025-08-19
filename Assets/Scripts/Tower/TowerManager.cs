@@ -59,7 +59,6 @@ public class TowerManager : MonoBehaviour
         ValidateTowerPrefab();
         SetupInput();
 
-        Debug.Log("TowerManager: Ready for tower placement");
     }
 
     void OnEnable()
@@ -225,7 +224,6 @@ public class TowerManager : MonoBehaviour
         }
         CreatePlacementPreview();
 
-        Debug.Log("TowerManager: Placement mode started - Click to place tower, ESC to cancel");
     }
 
     public void TogglePlacementMode()
@@ -430,7 +428,6 @@ public class TowerManager : MonoBehaviour
 
         towersBuilt++;
 
-        Debug.Log($"TowerManager: Placed tower {towersBuilt} at grid ({gridPos.x}, {gridPos.y})");
 
         // Continue placement mode for multiple towers
         // CancelPlacement(); // Uncomment this if you want to exit placement mode after placing one tower
@@ -453,7 +450,6 @@ public class TowerManager : MonoBehaviour
             previewTower = null;
         }
 
-        Debug.Log("TowerManager: Placement cancelled");
     }
 
     public void ToggleAllTowerRanges()
@@ -499,7 +495,6 @@ public class TowerManager : MonoBehaviour
         {
             activeTowers.Remove(tower);
             DestroyImmediate(tower.gameObject);
-            Debug.Log("TowerManager: Tower destroyed");
         }
     }
 
@@ -516,7 +511,6 @@ public class TowerManager : MonoBehaviour
         activeTowers.Clear();
         towersBuilt = 0;
 
-        Debug.Log("TowerManager: All towers destroyed");
     }
 
     // Context menu for testing

@@ -94,7 +94,6 @@ public class GridManager : MonoBehaviour
             return grid[gridX, gridY];
         }
 
-        Debug.LogWarning($"Tried to access invalid grid position ({gridX}, {gridY})");
         return null;
     }
 

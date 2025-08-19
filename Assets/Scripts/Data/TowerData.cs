@@ -30,11 +30,20 @@ public class TowerData : ScriptableObject
     public GameObject towerPrefab;
     public GameObject projectilePrefab;
     public GameObject muzzleFlashEffect;
+    [SerializeField] private GameObject explosionEffectPrefab;
+
+
+    [Header("Area Damage Settings")]
+    [SerializeField] private bool enableDamageFalloff = true;
+    [SerializeField] private float minimumDamagePercent = 0.5f; // 50% damage at splash edge
+
 
     [Header("Audio")]
     public AudioClip fireSound;
     public AudioClip placementSound;
     public AudioClip upgradeSound;
+    [SerializeField] private AudioClip explosionSound;
+
 
     [Header("Visual Upgrades")]
     public Material[] levelMaterials;
@@ -54,6 +63,11 @@ public class TowerData : ScriptableObject
     public float FireCooldown => 1f / fireRate;
     public bool CanBeUpgraded => upgradeLevel < maxUpgradeLevel && nextUpgrade != null;
     public bool IsMaxLevel => upgradeLevel >= maxUpgradeLevel;
+
+    public GameObject ExplosionEffectPrefab => explosionEffectPrefab;
+    public AudioClip ExplosionSound => explosionSound;
+    public bool EnableDamageFalloff => enableDamageFalloff;
+    public float MinimumDamagePercent => minimumDamagePercent;
 }
 
 public enum AttackType

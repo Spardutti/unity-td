@@ -62,7 +62,6 @@ public class Enemy : MonoBehaviour
         }
         transform.localScale = enemySize;
 
-        Debug.Log($"Enemy spawned with {maxHealth} HP");
     }
 
     private void StartMovement()
@@ -76,7 +75,6 @@ public class Enemy : MonoBehaviour
         Waypoint startWaypoint = pathManager.GetStartWaypoint();
         if (startWaypoint != null)
         {
-            Debug.Log($"Enemy: Starting at waypoint {startWaypoint.Order}");
             transform.position = startWaypoint.Position;
             currentWaypointIndex = 0;
             MoveToNextWaypoint();
@@ -87,15 +85,12 @@ public class Enemy : MonoBehaviour
     {
         if (currentWaypointIndex >= pathManager.WaypointCount)
         {
-            Debug.Log($"Enemy: Reached end of path");
             ReachPathEnd();
             return;
         }
-        Debug.Log($"Enemy: Moving to waypoint {currentWaypointIndex + 1}");
         currentTargetWaypoint = pathManager.Waypoints[currentWaypointIndex];
         if (currentTargetWaypoint != null)
         {
-            Debug.Log($"Enemy: Moving to waypoint {currentTargetWaypoint.Order}");
             StartCoroutine(MoveToWaypoint(currentTargetWaypoint));
         }
     }
@@ -111,7 +106,6 @@ public class Enemy : MonoBehaviour
 
         float elapsedTime = 0f;
 
-        Debug.Log($"Enemy moving to waypoint {targetWaypoint.Order} - Distance: {distance} - time: {journeyTime:F2}s");
 
         while (elapsedTime < journeyTime)
         {
@@ -138,7 +132,6 @@ public class Enemy : MonoBehaviour
         currentWaypointIndex++;
         isMoving = false;
 
-        Debug.Log($"Enemy reached waypoint {targetWaypoint.Order}");
 
         MoveToNextWaypoint();
 
@@ -146,7 +139,6 @@ public class Enemy : MonoBehaviour
 
     private void ReachPathEnd()
     {
-        Debug.Log(" Enemy reached end of path");
 
         DestroyEnemy();
     }
@@ -170,7 +162,6 @@ public class Enemy : MonoBehaviour
 
     private void Die()
     {
-        Debug.Log($"Enemy died! Reward: {goldReward}");
 
         // Award gold to player
         if (EconomyManager.Instance != null)
@@ -187,7 +178,6 @@ public class Enemy : MonoBehaviour
 
     private void DestroyEnemy()
     {
-        Debug.Log($"Enemy destroyed");
         Destroy(gameObject);
     }
 

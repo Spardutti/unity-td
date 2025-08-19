@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 public class Tower : MonoBehaviour
 {
@@ -9,6 +10,8 @@ public class Tower : MonoBehaviour
 
     [Header("Visual Settings")]
     [SerializeField] private Color towerColor = Color.blue;
+    [SerializeField] private GameObject explosionEffectPrefab;
+    [SerializeField] private AudioClip explosionSound;
 
     [Header("Targeting")]
     [SerializeField] private TargetingMode targetingMode = TargetingMode.Closest;
@@ -94,8 +97,16 @@ public class Tower : MonoBehaviour
             {
                 fireSound = towerData.fireSound;
             }
+            if (towerData.ExplosionEffectPrefab != null)
+            {
+                explosionEffectPrefab = towerData.ExplosionEffectPrefab;
+            }
 
-            Debug.Log($"Tower initialized with {towerData.GetLevelDisplayName()}");
+            if (towerData.ExplosionSound != null)
+            {
+                explosionSound = towerData.ExplosionSound;
+            }
+
         }
     }
 
@@ -119,14 +130,7 @@ public class Tower : MonoBehaviour
         if (gridManager != null)
         {
             bool success = gridManager.TryOccupyCell(gridPosition);
-            if (!success)
-            {
-                Debug.LogWarning($"Tower {name} could not occupy grid position ({gridPosition.x}, {gridPosition.y})");
-            }
-            else
-            {
-                Debug.Log($"Tower {name} registered with grid position ({gridPosition.x}, {gridPosition.y})");
-            }
+
         }
     }
 
@@ -228,7 +232,7 @@ public class Tower : MonoBehaviour
     {
         if (projectilePrefab == null)
         {
-            Debug.LogWarning($"Tower {name} has no projectile prefab assigned");
+            Debug.LogWarning($"Tower {name} has no projectile prefab assigned WONT ATTACK");
             return;
         }
         if (projectilesSpawnPoint == null)
@@ -239,8 +243,17 @@ public class Tower : MonoBehaviour
 
         if (currentTarget == null) return;
 
-        // Instant damage
-        currentTarget.TakeDamage(AttackDamage);
+        Debug.Log("AttackType: " + AttackType);
+        if (AttackType == AttackType.Area)
+        {
+            ApplyAreaDamage(currentTarget.transform.position);
+        }
+        else
+        {
+
+            // Instant damage
+            currentTarget.TakeDamage(AttackDamage);
+        }
 
         PlayFireSound();
 
@@ -269,10 +282,7 @@ public class Tower : MonoBehaviour
 
     private void PlayFireSound()
     {
-        Debug.Log($"Tower {name}: PlayFireSound called");
-        Debug.Log($"Tower {name}: playFireSound = {playFireSound}");
-        Debug.Log($"Tower {name}: fireSound = {(fireSound != null ? fireSound.name : "NULL")}");
-        Debug.Log($"Tower {name}: audioSource = {(audioSource != null ? "EXISTS" : "NULL")}");
+
 
         if (!playFireSound)
         {
@@ -292,16 +302,18 @@ public class Tower : MonoBehaviour
             return;
         }
 
-        Debug.Log($"Tower {name}: All checks passed, playing sound");
         audioSource.clip = fireSound;
         audioSource.volume = soundVolume;
         audioSource.Play();
-        Debug.Log($"Tower {name}: Sound played successfully");
     }
 
     private System.Collections.IEnumerator AttackFlash()
     {
-        if (towerRenderer != null)
+        if (towerRenderer == null)
+        {
+            Debug.LogWarning($"Tower {name}: No tower renderer found");
+            yield break;
+        }
         {
             Color originalColor = towerRenderer.material.color;
             towerRenderer.material.color = Color.white;
@@ -310,6 +322,83 @@ public class Tower : MonoBehaviour
 
             towerRenderer.material.color = originalColor;
         }
+    }
+
+    private void ApplyAreaDamage(Vector3 explosionCenter)
+    {
+        Debug.Log("Area damage");
+        if (SplashRadius <= 0f)
+        {
+            Debug.LogWarning($"Tower {name}: No splash radius specified for area damage");
+            return;
+        }
+
+        // Find all enemies within splash radius
+        Enemy[] allEnemies = FindObjectsByType<Enemy>(FindObjectsSortMode.None);
+        List<Enemy> affectedEnemies = new List<Enemy>();
+
+        foreach (Enemy enemy in allEnemies)
+        {
+            if (enemy != null && enemy.IsAlive)
+            {
+                float distance = Vector3.Distance(explosionCenter, enemy.transform.position);
+                if (distance <= SplashRadius)
+                {
+                    affectedEnemies.Add(enemy);
+
+                    // Damage falloff based on distance
+                    float damageMultiplier = 1f - (distance / SplashRadius) * 0.5f; // 50% minimum damage at edge
+                    float actualDamage = AttackDamage * damageMultiplier;
+
+                    enemy.TakeDamage(actualDamage);
+                }
+            }
+        }
+
+        ShowAreaDamageEffect(explosionCenter);
+    }
+
+    private void ShowAreaDamageEffect(Vector3 center)
+    {
+        if (explosionEffectPrefab == null)
+        {
+            Debug.LogWarning($"Tower {name}: No explosion effect prefab assigned");
+            return;
+
+        }
+
+        // instantiate explosion effect
+        GameObject explosion = Instantiate(explosionEffectPrefab, center, Quaternion.identity);
+
+        // Scale effect based on splash radius
+        explosion.transform.localScale = Vector3.one * (SplashRadius / 2f);
+
+        // Auto destroy after particle system duration
+        ParticleSystem particles = explosion.GetComponent<ParticleSystem>();
+        if (particles != null)
+        {
+            float duration = particles.main.duration + particles.main.startLifetime.constantMax;
+            Destroy(explosion, duration);
+        }
+        else
+        {
+            Destroy(explosion, 2f);
+        }
+
+        PlayExplosionSound(explosion);
+    }
+
+    private void PlayExplosionSound(GameObject explosionObject)
+    {
+        if (explosionSound == null) return;
+
+        AudioSource explosionAudio = explosionObject.GetComponent<AudioSource>();
+        if (explosionAudio != null)
+        {
+            explosionAudio.clip = explosionSound;
+            explosionAudio.Play();
+        }
+
     }
 
     public bool CanUpgrade()
@@ -329,7 +418,6 @@ public class Tower : MonoBehaviour
         // Update visuals if needed
         UpdateTowerVisuals();
 
-        Debug.Log($"Tower {name} upgraded to {towerData.GetLevelDisplayName()}");
         return true;
     }
 
@@ -360,12 +448,6 @@ public class Tower : MonoBehaviour
     {
         return $"Damage: {AttackDamage:F1}, Range: {AttackRange:F1}, Speed: {AttackSpeed:F1}";
     }
-
-
-
-
-
-
 
     void OnDestroy()
     {

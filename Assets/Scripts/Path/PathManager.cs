@@ -51,7 +51,6 @@ public class PathManager : MonoBehaviour
             MarkPathCellsInGrid();
         }
 
-        Debug.Log($"PathManager: Path setup complete with {waypoints.Count} waypoints");
 
         OnPathSetupComplete?.Invoke();
 
@@ -63,19 +62,12 @@ public class PathManager : MonoBehaviour
         waypoints.Clear();
         waypoints.AddRange(foundWaypoints);
 
-        Debug.Log($"PathManager: Found {foundWaypoints.Length} waypoints");
     }
 
     private void SortWaypointsByOrder()
     {
         waypoints = waypoints.OrderBy(w => w.Order).ToList();
 
-        Debug.Log($"PathManager: Sorted waypoints by order");
-
-        for (int i = 0; i < waypoints.Count; i++)
-        {
-            Debug.Log($"PathManager: Waypoint {i} order: {waypoints[i].Order}");
-        }
     }
 
     private void ValidatePath()
@@ -103,7 +95,6 @@ public class PathManager : MonoBehaviour
             }
         }
 
-        Debug.Log($"PathManager: Validated path with {waypoints.Count} waypoints");
     }
 
     private void MarkPathCellsInGrid()
@@ -122,7 +113,6 @@ public class PathManager : MonoBehaviour
             if (cell != null)
             {
                 gridManager.SetCellType(gridCoords.x, gridCoords.y, CellType.Path);
-                Debug.Log($"PathManager: Marked cell ({gridCoords.x}, {gridCoords.y}) as path cell");
             }
         }
 
@@ -137,7 +127,6 @@ public class PathManager : MonoBehaviour
             return;
         }
 
-        Debug.Log("Pathmanager: Marking path between cells");
         int totalPathCells = 0;
 
         for (int i = 0; i < waypoints.Count - 1; i++)

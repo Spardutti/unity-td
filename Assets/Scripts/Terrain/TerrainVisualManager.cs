@@ -37,7 +37,6 @@ public class TerrainVisualManager : MonoBehaviour
         if (pathManager != null)
         {
             pathManager.OnPathSetupComplete.AddListener(OnPathSetupComplete);
-            Debug.Log("Terrain3DVisualManager: Attached to PathManager");
         }
 
         GenerateTerrainVisuals();
@@ -53,7 +52,6 @@ public class TerrainVisualManager : MonoBehaviour
 
     private void OnPathSetupComplete()
     {
-        Debug.Log("Terrain3DVisualManager: Path setup complete");
         GenerateTerrainVisuals();
     }
 
@@ -97,7 +95,6 @@ public class TerrainVisualManager : MonoBehaviour
             return;
         }
 
-        Debug.Log($"Starting 3D terrain generation for {gridManager.Width}x{gridManager.Height} grid");
 
         // Clear existing tiles
         ClearExistingTiles();
@@ -123,16 +120,11 @@ public class TerrainVisualManager : MonoBehaviour
                     if (cellType == CellType.Path) pathTiles++;
                     else grassTiles++;
 
-                    // Debug first few tiles
-                    if (tilesCreated <= 5)
-                    {
-                        Debug.Log($"Created tile at ({x},{y}) - Type: {cellType}, Position: {tileObj.transform.position}");
-                    }
+
                 }
             }
         }
 
-        Debug.Log($"Terrain3DVisualManager: Created {tilesCreated} tiles ({pathTiles} path, {grassTiles} grass)");
     }
 
     private GameObject CreateTileGameObject(int gridX, int gridY, CellType cellType)

@@ -8,10 +8,8 @@ public class Tower : MonoBehaviour
     [Header("Tower Configuration")]
     [SerializeField] private TowerData towerData;
 
-    [Header("Visual Settings")]
-    [SerializeField] private Color towerColor = Color.blue;
-    [SerializeField] private GameObject explosionEffectPrefab;
-    [SerializeField] private AudioClip explosionSound;
+    [Header("Component References")]
+    [SerializeField] private Transform projectilesSpawnPoint;
 
     [Header("Targeting")]
     [SerializeField] private TargetingMode targetingMode = TargetingMode.Closest;
@@ -20,13 +18,8 @@ public class Tower : MonoBehaviour
     [SerializeField] private bool showRangeIndicator = true;
     [SerializeField] private bool showRangeWhenSelected = true;
 
-    [Header("Projectile Settings")]
-    [SerializeField] private GameObject projectilePrefab;
-    [SerializeField] private Transform projectilesSpawnPoint;
+    [Header("Debug Settings")]
     [SerializeField] private bool debugProjectiles = false;
-
-    [Header("Audio")]
-    [SerializeField] private AudioClip fireSound;
     [SerializeField] private bool playFireSound = true;
     [SerializeField] private float soundVolume = 1f;
 
@@ -47,6 +40,12 @@ public class Tower : MonoBehaviour
     public AttackType AttackType => towerData?.attackType ?? AttackType.Single;
     public float SplashRadius => towerData?.splashRadius ?? 0f;
 
+    // Data-driven properties
+    public GameObject ProjectilePrefab => towerData != null ? towerData.projectilePrefab : null;
+    public GameObject ExplosionEffectPrefab => towerData != null ? towerData.ExplosionEffectPrefab : null;
+    public AudioClip FireSound => towerData != null ? towerData.fireSound : null;
+    public AudioClip ExplosionSound => towerData != null ? towerData.ExplosionSound : null;
+    public GameObject MuzzleFlashEffect => towerData != null ? towerData.muzzleFlashEffect : null;
 
     void Awake()
     {
@@ -67,7 +66,6 @@ public class Tower : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        SetupVisuals();
         InitializeTowerData();
         SnapToGrid();
         RegisterWithGrid();
@@ -91,32 +89,7 @@ public class Tower : MonoBehaviour
         {
             // Set targeting mode from data
             targetingMode = towerData.defaultTargetingMode;
-
-            // Update any audio clips
-            if (towerData.fireSound != null)
-            {
-                fireSound = towerData.fireSound;
-            }
-            if (towerData.ExplosionEffectPrefab != null)
-            {
-                explosionEffectPrefab = towerData.ExplosionEffectPrefab;
-            }
-
-            if (towerData.ExplosionSound != null)
-            {
-                explosionSound = towerData.ExplosionSound;
-            }
-
         }
-    }
-
-    private void SetupVisuals()
-    {
-        if (towerRenderer != null)
-        {
-            towerRenderer.material.color = towerColor;
-        }
-
     }
 
     private void SnapToGrid()
@@ -230,7 +203,7 @@ public class Tower : MonoBehaviour
 
     private void FireProjectile()
     {
-        if (projectilePrefab == null)
+        if (ProjectilePrefab == null)
         {
             Debug.LogWarning($"Tower {name} has no projectile prefab assigned WONT ATTACK");
             return;
@@ -261,7 +234,7 @@ public class Tower : MonoBehaviour
         Vector3 spawnPosition = projectilesSpawnPoint.position;
         Vector3 targetPosition = currentTarget.transform.position;
 
-        GameObject newProjectile = Instantiate(projectilePrefab, spawnPosition, Quaternion.identity);
+        GameObject newProjectile = Instantiate(ProjectilePrefab, spawnPosition, Quaternion.identity);
         Projectile projectileScript = newProjectile.GetComponent<Projectile>();
 
         if (projectileScript != null)
@@ -290,7 +263,7 @@ public class Tower : MonoBehaviour
             return;
         }
 
-        if (fireSound == null)
+        if (FireSound == null)
         {
             Debug.LogWarning($"Tower {name}: No fire sound clip assigned");
             return;
@@ -302,7 +275,7 @@ public class Tower : MonoBehaviour
             return;
         }
 
-        audioSource.clip = fireSound;
+        audioSource.clip = FireSound;
         audioSource.volume = soundVolume;
         audioSource.Play();
     }
@@ -360,7 +333,7 @@ public class Tower : MonoBehaviour
 
     private void ShowAreaDamageEffect(Vector3 center)
     {
-        if (explosionEffectPrefab == null)
+        if (ExplosionEffectPrefab == null)
         {
             Debug.LogWarning($"Tower {name}: No explosion effect prefab assigned");
             return;
@@ -368,7 +341,7 @@ public class Tower : MonoBehaviour
         }
 
         // instantiate explosion effect
-        GameObject explosion = Instantiate(explosionEffectPrefab, center, Quaternion.identity);
+        GameObject explosion = Instantiate(ExplosionEffectPrefab, center, Quaternion.identity);
 
         // Scale effect based on splash radius
         explosion.transform.localScale = Vector3.one * (SplashRadius / 2f);
@@ -390,12 +363,12 @@ public class Tower : MonoBehaviour
 
     private void PlayExplosionSound(GameObject explosionObject)
     {
-        if (explosionSound == null) return;
+        if (ExplosionSound == null) return;
 
         AudioSource explosionAudio = explosionObject.GetComponent<AudioSource>();
         if (explosionAudio != null)
         {
-            explosionAudio.clip = explosionSound;
+            explosionAudio.clip = ExplosionSound;
             explosionAudio.Play();
         }
 

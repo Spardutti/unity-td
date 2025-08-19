@@ -27,7 +27,7 @@ MonoBehaviour:
   nextUpgrade: {fileID: 0}
   upgradeCost: 75
   towerPrefab: {fileID: 5591582020968000744, guid: d7ad520b853240640a4be71c2d1fa127, type: 3}
-  projectilePrefab: {fileID: 0}
+  projectilePrefab: {fileID: 6470800904125922143, guid: bc1e34df42ff77549a10b8e722e0c927, type: 3}
   muzzleFlashEffect: {fileID: 0}
   explosionEffectPrefab: {fileID: 9175668602326105391, guid: f4a1e3f610e7add488aa86674524113f, type: 3}
   enableDamageFalloff: 1

@@ -1,0 +1,84 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1318d09455158bb418bfe5905e6ab82e, type: 3}
+  m_Name: Timeline_Test_2Min
+  m_EditorClassIdentifier: Assembly-CSharp::SpawnTimeLine
+  timeLineName: 2 Minute Test
+  waveDescription: Continuous enemy spawning over 2 minutes
+  totalGameTime: 120
+  useInfiniteTime: 0
+  spawnEvents:
+  - triggerTime: 0
+    eventName: Initial Enemy
+    enemyPrefab: {fileID: 6666418326833412808, guid: f7c2311d694171a459fcd0bd38782370, type: 3}
+    enemyCount: 1
+    spawnPattern: 0
+    spawnInterval: 0
+    burstDuration: 0
+    showWarning: 0
+    warningTime: 0
+    warningMessage: 
+    spawnSound: {fileID: 0}
+    playSpawnEffect: 0
+  - triggerTime: 5
+    eventName: Small Group
+    enemyPrefab: {fileID: 6666418326833412808, guid: f7c2311d694171a459fcd0bd38782370, type: 3}
+    enemyCount: 3
+    spawnPattern: 1
+    spawnInterval: 0.5
+    burstDuration: 0
+    showWarning: 0
+    warningTime: 0
+    warningMessage: 
+    spawnSound: {fileID: 0}
+    playSpawnEffect: 0
+  - triggerTime: 15
+    eventName: Medium Wave
+    enemyPrefab: {fileID: 6666418326833412808, guid: f7c2311d694171a459fcd0bd38782370, type: 3}
+    enemyCount: 8
+    spawnPattern: 2
+    spawnInterval: 0.5
+    burstDuration: 2
+    showWarning: 0
+    warningTime: 0
+    warningMessage: 
+    spawnSound: {fileID: 0}
+    playSpawnEffect: 0
+  enableBackgroundSpawning: 0
+  backgroundSpawnInterval: 10
+  backgroundEnemyCount: 1
+  backgroundEnemyPrefab: {fileID: 0}
+  enableDifficultyScaling: 0
+  spawnRateMultiplier:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 1
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 2
+      inSlope: 1
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4

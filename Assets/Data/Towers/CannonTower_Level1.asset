@@ -29,9 +29,13 @@ MonoBehaviour:
   towerPrefab: {fileID: 5591582020968000744, guid: d7ad520b853240640a4be71c2d1fa127, type: 3}
   projectilePrefab: {fileID: 0}
   muzzleFlashEffect: {fileID: 0}
+  explosionEffectPrefab: {fileID: 9175668602326105391, guid: f4a1e3f610e7add488aa86674524113f, type: 3}
+  enableDamageFalloff: 1
+  minimumDamagePercent: 0.5
   fireSound: {fileID: 0}
   placementSound: {fileID: 0}
   upgradeSound: {fileID: 0}
+  explosionSound: {fileID: 8300000, guid: a234d1f7df16df54fa1d11c858d58708, type: 3}
   levelMaterials: []
   levelScales:
   - 1

@@ -9,7 +9,6 @@ public class Tower : MonoBehaviour
 
     [Header("Visual Settings")]
     [SerializeField] private Color towerColor = Color.blue;
-    [SerializeField] private Vector3 towerSize = new Vector3(0.8f, 1f, 0.8f);
 
     [Header("Targeting")]
     [SerializeField] private TargetingMode targetingMode = TargetingMode.Closest;
@@ -107,13 +106,12 @@ public class Tower : MonoBehaviour
             towerRenderer.material.color = towerColor;
         }
 
-        transform.localScale = towerSize;
     }
 
     private void SnapToGrid()
     {
         gridPosition = GridUtility.GetGridPosition(transform, gridManager);
-        GridUtility.SnapToGrid(transform, gridManager, towerSize.y * 0.5f);
+        GridUtility.SnapToGrid(transform, gridManager, transform.localScale.y * 0.5f);
     }
 
     private void RegisterWithGrid()
@@ -343,7 +341,7 @@ public class Tower : MonoBehaviour
         if (towerData.levelScales != null && towerData.upgradeLevel <= towerData.levelScales.Length)
         {
             float scale = towerData.levelScales[towerData.upgradeLevel - 1];
-            transform.localScale = towerSize * scale;
+            transform.localScale = transform.localScale * scale;
         }
 
         // Update material if specified

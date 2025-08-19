@@ -258,8 +258,6 @@ public class TowerManager : MonoBehaviour
         Tower towerScript = previewTower.GetComponent<Tower>();
         if (towerScript != null)
         {
-            // Apply the tower size before disabling
-            previewTower.transform.localScale = new Vector3(0.8f, 1f, 0.8f);
             towerScript.enabled = false;
         }
 
@@ -281,7 +279,7 @@ public class TowerManager : MonoBehaviour
                 materials[i].EnableKeyword("_ALPHABLEND_ON");
                 materials[i].DisableKeyword("_ALPHAPREMULTIPLY_ON");
                 materials[i].renderQueue = 3000;
-                
+
                 // Set transparency
                 Color color = materials[i].color;
                 color.a = 0.5f;
@@ -329,7 +327,7 @@ public class TowerManager : MonoBehaviour
 
         // Update all renderers in the preview
         Renderer[] renderers = previewTower.GetComponentsInChildren<Renderer>();
-        
+
         foreach (Renderer renderer in renderers)
         {
             Color tintColor;
@@ -346,7 +344,7 @@ public class TowerManager : MonoBehaviour
                 tintColor = Color.green;
             }
             tintColor.a = 0.5f;
-            
+
             // Apply tint to all materials
             foreach (Material mat in renderer.materials)
             {

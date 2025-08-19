@@ -31,7 +31,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 387.30234, y: 0, z: 547.5393}
-  m_LocalScale: {x: 1, y: 0.18, z: 1}
+  m_LocalScale: {x: 1, y: 0.2, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -133,7 +133,6 @@ MonoBehaviour:
   targetingMode: 0
   showRangeIndicator: 1
   showRangeWhenSelected: 1
-  rangeColor: {r: 1, g: 1, b: 1, a: 0.3}
   projectilePrefab: {fileID: 0}
   projectilesSpawnPoint: {fileID: 0}
   debugProjectiles: 0

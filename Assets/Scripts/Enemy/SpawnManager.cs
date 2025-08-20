@@ -3,6 +3,8 @@ using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
+using UnityEditor.ShaderGraph.Internal;
+using Mono.Cecil;
 
 public class SpawnManager : MonoBehaviour
 {
@@ -12,6 +14,15 @@ public class SpawnManager : MonoBehaviour
 
     [Header("References")]
     [SerializeField] private EnemySpawner enemySpawner;
+
+    [Header("Continuos Spawning")]
+    [SerializeField] private ContinuosSpawnConfig continuousSpawningConfig;
+    [SerializeField] private bool enableContinuousSpawning = true;
+    [SerializeField] private bool showContinuousSpawningDebug = false;
+
+    [Header("Hybrid System Settings")]
+    [SerializeField] private float continuousSpawnMultiplier = 1f; // global multiplier for continuous spawns
+    [SerializeField] private bool pauseContinuousSpawningDuringEvents = false;
 
     [Header("UI References")]
     [SerializeField] private Button startGameButton;
@@ -30,6 +41,16 @@ public class SpawnManager : MonoBehaviour
     private Coroutine backgroundSpawnCoroutine;
     private Coroutine gameTimerCoroutine;
 
+    // Continuous Spawning State
+    private Coroutine continuousSpawnCoroutine;
+    private float lastContinuousSpawnTime = 0f;
+    private float nextContinuousSpawnTime = 0f;
+    private int totalContinuousEnemiesSpawned = 0;
+
+    // Difficulty Scaling
+    private float currentDifficultyMultiplier = 1f;
+    private float currentEnemyHealthMultiplier = 1f;
+
     // Events
     public static System.Action<float> OnGameTimeChanged;
     public static System.Action OnGameStarted;
@@ -41,6 +62,10 @@ public class SpawnManager : MonoBehaviour
     public float CurrentGameTime => currentGameTime;
     public float TimeLineProgress => currentTimeLine?.GetTimeLineProgress(currentGameTime) ?? 0f;
     public bool IsTimeLineComplete => currentTimeLine != null && currentTimeLine.IsTimeLineComplete(currentGameTime);
+    public bool IsContinuousSpawningActive => continuousSpawnCoroutine != null;
+    public int TotalContinuousEnemiesSpawned => totalContinuousEnemiesSpawned;
+    public float CurrentDifficultyMultiplier => currentDifficultyMultiplier;
+    public ContinuosSpawnConfig ContinuousSpawnConfig => continuousSpawningConfig;
 
     void Awake()
     {
@@ -129,6 +154,11 @@ public class SpawnManager : MonoBehaviour
 
         // Start coroutines
         gameTimerCoroutine = StartCoroutine(GameTimerRoutine());
+        // Start continuous spawning if enabled
+        if (enableContinuousSpawning && continuousSpawningConfig != null)
+        {
+            StartContinuousSpawning();
+        }
 
         if (currentTimeLine.enableBackgroundSpawning)
         {
@@ -144,6 +174,128 @@ public class SpawnManager : MonoBehaviour
         UpdateUI();
     }
 
+    private void StartContinuousSpawning()
+    {
+        if (continuousSpawnCoroutine != null)
+        {
+            StopCoroutine(continuousSpawnCoroutine);
+        }
+
+        continuousSpawnCoroutine = StartCoroutine(ContinuousSpawnRoutine());
+        totalContinuousEnemiesSpawned = 0;
+
+        if (showContinuousSpawningDebug)
+        {
+            Debug.Log("SpawnManager: Continuous Spawning Started");
+        }
+    }
+
+    private IEnumerator ContinuousSpawnRoutine()
+    {
+        lastContinuousSpawnTime = 0f;
+
+        while (isGameActive && !continuousSpawningConfig.IsTimelineComplete(currentGameTime))
+        {
+            // update difficulty multiplier
+            currentEnemyHealthMultiplier = continuousSpawningConfig.GetDifficultyMultiplierAtTime(currentGameTime);
+            currentEnemyHealthMultiplier *= continuousSpawningConfig.GetEnemyHealthMultiplierAtTime(currentGameTime);
+
+            // check if we should pass continuos spawning during events
+            bool shouldSpawn = true;
+            if (pauseContinuousSpawningDuringEvents)
+            {
+                // check if any even is currently active
+                shouldSpawn = !IsAnyEventCurrentlyActive();
+            }
+
+            if (shouldSpawn)
+            {
+                // calculate next spawn time
+                float spawnInterval = continuousSpawningConfig.GetSpawnIntervalAtTime(currentGameTime);
+                spawnInterval *= continuousSpawnMultiplier;
+
+                // add random delay if enabled
+                if (continuousSpawningConfig.UseRandomSpawnDelay)
+                {
+                    Vector2 delayRange = continuousSpawningConfig.RandomDelayRange;
+                    float randomDelay = Random.Range(delayRange.x, delayRange.y);
+                    spawnInterval += randomDelay;
+                }
+
+                nextContinuousSpawnTime = lastContinuousSpawnTime + spawnInterval;
+
+                // check if it is time to spawn
+                if (currentGameTime >= nextContinuousSpawnTime)
+                {
+                    SpawnContinuousEnemy();
+                    lastContinuousSpawnTime = currentGameTime;
+                }
+            }
+            yield return new WaitForSeconds(0.1f); // check every 100ms for smooth spawning
+        }
+
+        if (showContinuousSpawningDebug)
+        {
+            Debug.Log("SpawnManager: Continuous Spawning Completed");
+        }
+        continuousSpawnCoroutine = null;
+    }
+
+    private void SpawnContinuousEnemy()
+    {
+        if (enemySpawner == null || continuousSpawningConfig == null)
+        {
+            return;
+        }
+
+        // Select enemy type based on current time and weights
+        GameObject enemyPrefab = continuousSpawningConfig.GetRandomEnemyAtTime(currentGameTime);
+        if (enemyPrefab == null)
+        {
+            if (showContinuousSpawningDebug)
+            {
+                Debug.LogWarning("SpawnManager: No enemy available for continuous spawn");
+            }
+            return;
+        }
+
+        // Spawn enemy using spawner with the selected prefab and health multiplier
+        GameObject spawnedEnemy = enemySpawner.SpawnSpecificEnemy(enemyPrefab, currentEnemyHealthMultiplier);
+        
+        if (spawnedEnemy != null)
+        {
+            totalContinuousEnemiesSpawned++;
+
+            if (showContinuousSpawningDebug)
+            {
+                float spawnRate = continuousSpawningConfig.GetSpawnRateAtTime(currentGameTime);
+                Debug.Log($"SpawnManager: Spawned continuous enemy {totalContinuousEnemiesSpawned} ({enemyPrefab.name}) at {currentGameTime:F1} with spawn rate {spawnRate:F2} and health multiplier {currentEnemyHealthMultiplier:F2}");
+            }
+        }
+    }
+
+    private bool IsAnyEventCurrentlyActive()
+    {
+        // Simple implementation - you can make this more sophisticated
+        // For now, assume events are "active" for 5 seconds after triggering
+        if (currentTimeLine == null || currentTimeLine.spawnEvents == null) return false;
+
+        for (int i = 0; i < currentTimeLine.spawnEvents.Length; i++)
+        {
+            if (eventTriggered[i])
+            {
+                SpawnEvent spawnEvent = currentTimeLine.spawnEvents[i];
+                float eventEndTime = spawnEvent.triggerTime + 5f; // assume duration is 5 seconds
+
+                if (currentGameTime >= spawnEvent.triggerTime && currentGameTime < eventEndTime)
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
+
+    }
     public void StopGame()
     {
         if (!isGameActive) return;
@@ -163,6 +315,12 @@ public class SpawnManager : MonoBehaviour
         {
             StopCoroutine(backgroundSpawnCoroutine);
             backgroundSpawnCoroutine = null;
+        }
+
+        if (continuousSpawnCoroutine != null)
+        {
+            StopCoroutine(continuousSpawnCoroutine);
+            continuousSpawnCoroutine = null;
         }
 
         OnGameEnded?.Invoke();
@@ -332,6 +490,7 @@ public class SpawnManager : MonoBehaviour
             SpawnEvent nextEvent = GetNextSpawnEvent();
             if (nextEvent != null)
             {
+                Debug.Log($"Spawn manager {nextEvent.eventName}");
                 float timeUntil = nextEvent.triggerTime - currentGameTime;
                 nextEventText.text = $"Next Event: {nextEvent.eventName} in {timeUntil:F1}s ";
             }
@@ -348,7 +507,8 @@ public class SpawnManager : MonoBehaviour
 
     private SpawnEvent GetNextSpawnEvent()
     {
-        if (currentTimeLine != null && currentTimeLine.spawnEvents == null) return null;
+        if (currentTimeLine == null || currentTimeLine.spawnEvents == null) return null;
+
 
         for (int i = 0; i < currentTimeLine.spawnEvents.Length; i++)
         {

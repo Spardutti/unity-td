@@ -68,31 +68,57 @@ public class EnemySpawner : MonoBehaviour
             return;
         }
 
+        SpawnSpecificEnemy(enemyPrefab);
+    }
+
+    public GameObject SpawnSpecificEnemy(GameObject specificEnemyPrefab, float healthMultiplier = 1f)
+    {
+        if (specificEnemyPrefab == null)
+        {
+            Debug.LogError("EnemySpawner: Specific enemy prefab not found");
+            return null;
+        }
+
         if (pathManager == null)
         {
             Debug.LogError("EnemySpawner: PathManager not found");
-            return;
+            return null;
         }
 
         Waypoint spawnPoint = pathManager.GetStartWaypoint();
         if (spawnPoint == null)
         {
             Debug.LogError("EnemySpawner: No start waypoint found");
-            return;
+            return null;
         }
 
         // Calculate spawn position
         Vector3 spawnPosition = spawnPoint.Position + spawnOffset;
 
         // Spawn the enemy
-        GameObject newEnemy = Instantiate(enemyPrefab, spawnPosition, Quaternion.identity, spawnParent);
+        GameObject newEnemy = Instantiate(specificEnemyPrefab, spawnPosition, Quaternion.identity, spawnParent);
         newEnemy.SetActive(true);
         newEnemy.name = $"Enemy_{enemiesSpawned:000}";
 
+        // Apply health multiplier if needed
+        if (healthMultiplier != 1f)
+        {
+            Enemy enemyComponent = newEnemy.GetComponent<Enemy>();
+            if (enemyComponent == null)
+            {
+                enemyComponent = newEnemy.GetComponentInChildren<Enemy>();
+            }
+            
+            if (enemyComponent != null)
+            {
+                enemyComponent.ApplyHealthMultiplier(healthMultiplier);
+            }
+        }
+
         enemiesSpawned++;
-        Debug.Log($"EnemySpawner: Spawned enemy {enemiesSpawned}");
+        Debug.Log($"EnemySpawner: Spawned enemy {enemiesSpawned} ({specificEnemyPrefab.name})");
 
-
+        return newEnemy;
     }
 
     public void SpawnMultipleEnemies(int count)

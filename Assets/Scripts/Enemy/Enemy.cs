@@ -64,6 +64,13 @@ public class Enemy : MonoBehaviour
 
     }
 
+    public void ApplyHealthMultiplier(float multiplier)
+    {
+        maxHealth *= multiplier;
+        currentHeath = maxHealth;
+        Debug.Log($"Enemy: Applied health multiplier {multiplier}, new health: {maxHealth}");
+    }
+
     private void StartMovement()
     {
         if (pathManager == null || pathManager.WaypointCount == 0)

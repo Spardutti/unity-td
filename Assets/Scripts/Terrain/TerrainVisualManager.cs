@@ -8,23 +8,23 @@ public class TerrainVisualManager : MonoBehaviour
     [SerializeField] private GameObject buildableTilePrefab;
 
     private GridManager gridManager;
-    private PathManager pathManager;
+    private MultiPathManager multiPathManager;
     private Transform tilesParent;
     private GameObject[,] tileGameObjects;
 
     void Awake()
     {
         gridManager = FindFirstObjectByType<GridManager>();
-        pathManager = FindFirstObjectByType<PathManager>();
+        multiPathManager = FindFirstObjectByType<MultiPathManager>();
 
         if (gridManager == null)
         {
             Debug.LogError("Terrain3DVisualManager: GridManager not found!");
         }
 
-        if (pathManager == null)
+        if (multiPathManager == null)
         {
-            Debug.LogError("Terrain3DVisualManager: PathManager not found!");
+            Debug.LogError("Terrain3DVisualManager: multiPathManager not found!");
         }
     }
 
@@ -34,24 +34,6 @@ public class TerrainVisualManager : MonoBehaviour
 
         ValidatePrefabs();
 
-        if (pathManager != null)
-        {
-            pathManager.OnPathSetupComplete.AddListener(OnPathSetupComplete);
-        }
-
-        GenerateTerrainVisuals();
-    }
-
-    void OnDestroy()
-    {
-        if (pathManager != null)
-        {
-            pathManager.OnPathSetupComplete.RemoveListener(OnPathSetupComplete);
-        }
-    }
-
-    private void OnPathSetupComplete()
-    {
         GenerateTerrainVisuals();
     }
 

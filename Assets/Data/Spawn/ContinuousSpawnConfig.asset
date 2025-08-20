@@ -40,7 +40,20 @@ MonoBehaviour:
     m_RotationOrder: 4
   baseSpawnInterval: 1
   minimumSpawnInterval: 0.1
-  enemySpawnEntries: []
+  enemySpawnEntries:
+  - enemyPrefab: {fileID: 6666418326833412808, guid: f7c2311d694171a459fcd0bd38782370, type: 3}
+    enemyName: 
+    unlockTime: 0
+    lockTime: -1
+    spawnWeightCurve:
+      serializedVersion: 2
+      m_Curve: []
+      m_PreInfinity: 0
+      m_PostInfinity: 0
+      m_RotationOrder: 0
+    baseWeight: 0
+    isEliteEnemy: 0
+    isBossEnemy: 0
   difficultyMultiplierCurve:
     serializedVersion: 2
     m_Curve:
@@ -89,7 +102,7 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  spawnPositionVariation: 2
+  spawnPositionVariation: 1
   useRandomSpawnDelay: 1
   randomDelayRange: {x: 0, y: 0.5}
   showDebugInfo: 0

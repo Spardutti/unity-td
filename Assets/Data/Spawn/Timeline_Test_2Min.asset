@@ -29,7 +29,7 @@ MonoBehaviour:
     warningMessage: 
     spawnSound: {fileID: 0}
     playSpawnEffect: 0
-  - triggerTime: 5
+  - triggerTime: 30
     eventName: Small Group
     enemyPrefab: {fileID: 6666418326833412808, guid: f7c2311d694171a459fcd0bd38782370, type: 3}
     enemyCount: 3
@@ -41,7 +41,7 @@ MonoBehaviour:
     warningMessage: 
     spawnSound: {fileID: 0}
     playSpawnEffect: 0
-  - triggerTime: 15
+  - triggerTime: 60
     eventName: Medium Wave
     enemyPrefab: {fileID: 6666418326833412808, guid: f7c2311d694171a459fcd0bd38782370, type: 3}
     enemyCount: 8

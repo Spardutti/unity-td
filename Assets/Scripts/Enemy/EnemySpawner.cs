@@ -9,15 +9,15 @@ public class EnemySpawner : MonoBehaviour
     [Header("Spawn Settings")]
     [SerializeField] private Vector3 spawnOffset = Vector3.up * 0.5f;
 
-    private PathManager pathManager;
+    private MultiPathManager multiPathManager;
     private int enemiesSpawned = 0;
 
     public int EnemiesSpawned => enemiesSpawned;
 
     void Awake()
     {
-        pathManager = FindFirstObjectByType<PathManager>();
-        if (pathManager == null)
+        multiPathManager = FindFirstObjectByType<MultiPathManager>();
+        if (multiPathManager == null)
         {
             Debug.LogError("EnemySpawner: PathManager not found");
         }
@@ -79,36 +79,46 @@ public class EnemySpawner : MonoBehaviour
             return null;
         }
 
-        if (pathManager == null)
+        if (multiPathManager == null)
         {
             Debug.LogError("EnemySpawner: PathManager not found");
             return null;
         }
 
-        Waypoint spawnPoint = pathManager.GetStartWaypoint();
-        if (spawnPoint == null)
+        PathData randomPath = multiPathManager.GetRandomPath();
+        if (randomPath == null)
         {
-            Debug.LogError("EnemySpawner: No start waypoint found");
+            Debug.LogError("EnemySpawner: No Paths available");
             return null;
         }
 
+        Waypoint spawnPoint = randomPath.GetStartWaypoint();
+
         // Calculate spawn position
         Vector3 spawnPosition = spawnPoint.Position + spawnOffset;
+
 
         // Spawn the enemy
         GameObject newEnemy = Instantiate(specificEnemyPrefab, spawnPosition, Quaternion.identity, spawnParent);
         newEnemy.SetActive(true);
         newEnemy.name = $"Enemy_{enemiesSpawned:000}";
 
+        // Store the selected path on the enemy for pathfinding
+        Enemy enemyComponent = newEnemy.GetComponent<Enemy>();
+        if (enemyComponent == null)
+        {
+            enemyComponent = newEnemy.GetComponentInChildren<Enemy>();
+        }
+
+        if (enemyComponent != null)
+        {
+            enemyComponent.SetPath(randomPath);
+        }
+
         // Apply health multiplier if needed
         if (healthMultiplier != 1f)
         {
-            Enemy enemyComponent = newEnemy.GetComponent<Enemy>();
-            if (enemyComponent == null)
-            {
-                enemyComponent = newEnemy.GetComponentInChildren<Enemy>();
-            }
-            
+            // Remove this duplicate declaration - use the existing enemyComponent
             if (enemyComponent != null)
             {
                 enemyComponent.ApplyHealthMultiplier(healthMultiplier);

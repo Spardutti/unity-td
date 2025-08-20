@@ -17,9 +17,12 @@ public class Enemy : MonoBehaviour
     [SerializeField] private float rotationSpeed = 180f;
     [SerializeField] private bool faceMovementDirection = true;
 
+    [Header("Debug Info")]
+    [SerializeField] private bool showDebugInfo = true;
+
 
     private float currentHeath;
-    private PathManager pathManager;
+    private PathData assignedPath;
     private Waypoint currentTargetWaypoint;
     private int currentWaypointIndex;
     private bool isMoving = false;
@@ -38,13 +41,6 @@ public class Enemy : MonoBehaviour
         currentHeath = maxHealth;
 
         enemyRenderer = GetComponent<Renderer>();
-
-        pathManager = FindFirstObjectByType<PathManager>();
-
-        if (pathManager == null)
-        {
-            Debug.LogError("Enemy: PathManager not found");
-        }
     }
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -71,15 +67,29 @@ public class Enemy : MonoBehaviour
         Debug.Log($"Enemy: Applied health multiplier {multiplier}, new health: {maxHealth}");
     }
 
+    public void SetPath(PathData path)
+    {
+        assignedPath = path;
+        if (assignedPath != null && showDebugInfo)
+        {
+            Debug.Log($"Enemy: Set path {assignedPath.pathName} with {assignedPath.WaypointCount} waypoints");
+        }
+    }
+
+    public PathData GetAssignedPath()
+    {
+        return assignedPath;
+    }
+
     private void StartMovement()
     {
-        if (pathManager == null || pathManager.WaypointCount == 0)
+        if (assignedPath == null || assignedPath.WaypointCount == 0)
         {
             Debug.LogError("Enemy: PathManager has no waypoints");
             return;
         }
 
-        Waypoint startWaypoint = pathManager.GetStartWaypoint();
+        Waypoint startWaypoint = assignedPath.GetStartWaypoint();
         if (startWaypoint != null)
         {
             transform.position = startWaypoint.Position;
@@ -90,12 +100,12 @@ public class Enemy : MonoBehaviour
 
     private void MoveToNextWaypoint()
     {
-        if (currentWaypointIndex >= pathManager.WaypointCount)
+        if (currentWaypointIndex >= assignedPath.WaypointCount)
         {
             ReachPathEnd();
             return;
         }
-        currentTargetWaypoint = pathManager.Waypoints[currentWaypointIndex];
+        currentTargetWaypoint = assignedPath.waypoints[currentWaypointIndex];
         if (currentTargetWaypoint != null)
         {
             StartCoroutine(MoveToWaypoint(currentTargetWaypoint));
@@ -190,9 +200,9 @@ public class Enemy : MonoBehaviour
 
     public float GetPathProgress()
     {
-        if (pathManager == null) return 0f;
+        if (assignedPath == null) return 0f;
 
-        return (float)currentWaypointIndex / pathManager.WaypointCount;
+        return (float)currentWaypointIndex / assignedPath.WaypointCount;
     }
 
     void OnDrawGizmosSelected()
@@ -218,9 +228,5 @@ public class Enemy : MonoBehaviour
         }
     }
 
-    // Update is called once per frame
-    void Update()
-    {
 
-    }
 }

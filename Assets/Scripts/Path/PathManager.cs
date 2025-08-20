@@ -227,10 +227,10 @@ public class PathManager : MonoBehaviour
 
         if (nextWaypoint == null)
         {
-            return (nextWaypoint.Position - waypoint.Position).normalized;
+            return Vector3.forward;
         }
 
-        return Vector3.forward;
+        return (nextWaypoint.Position - waypoint.Position).normalized;
     }
 
     void OnDrawGizmos()
@@ -261,11 +261,5 @@ public class PathManager : MonoBehaviour
     public void RefreshPath()
     {
         SetupPath();
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-
     }
 }

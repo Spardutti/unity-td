@@ -93,6 +93,16 @@ public class Tower : MonoBehaviour
         {
             Debug.LogWarning($"Tower {name} has no 'Turret' child - turret rotation disabled");
         }
+
+        if (turretTransform != null)
+        {
+            Transform turretSpawnPoint = turretTransform.Find("ProjectileSpawnPoint");
+            if (turretSpawnPoint != null)
+            {
+                projectilesSpawnPoint = turretSpawnPoint;
+            }
+        }
+
     }
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()

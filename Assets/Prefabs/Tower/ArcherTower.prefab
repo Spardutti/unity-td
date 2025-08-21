@@ -182,7 +182,6 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
-  - {fileID: 0}
   projectilesSpawnPoint: {fileID: 8905152759953546328}
   targetingMode: 0
   showRangeIndicator: 1

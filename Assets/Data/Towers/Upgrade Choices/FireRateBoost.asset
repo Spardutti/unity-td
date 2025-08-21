@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: FireRateBoost
   m_EditorClassIdentifier: Assembly-CSharp::TowerUpgradeChoice
   upgradeName: Fire Rate Boost
-  description: Increase tower range by 10%
+  description: Increase tower fire rate by 10%
   upgradeIcon: {fileID: 0}
   damageMultiplier: 1
   rangeMultiplier: 1

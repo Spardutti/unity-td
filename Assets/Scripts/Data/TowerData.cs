@@ -20,11 +20,9 @@ public class TowerData : ScriptableObject
     public TargetingMode defaultTargetingMode = TargetingMode.Closest;
     public float splashRadius = 0f;
 
-    [Header("Upgrade System")]
-    public int upgradeLevel = 1;
-    public int maxUpgradeLevel = 3;
-    public TowerData nextUpgrade;
-    public int upgradeCost = 75;
+    [Header("XP Progression System")]
+    [SerializeField] private int[] xpRequirements = { 50, 120, 200, 300, 420, 560, 720, 900, 1100, 1320 };
+    [SerializeField] private TowerUpgradeChoice[] upgradeChoicePool;
 
     [Header("Prefab References")]
     public GameObject towerPrefab;
@@ -49,11 +47,6 @@ public class TowerData : ScriptableObject
     public Material[] levelMaterials;
     public float[] levelScales = { 1f, 1.1f, 1.2f }; // Size increase per level
 
-    public string GetLevelDisplayName()
-    {
-        return $"{towerName} (Level {upgradeLevel})";
-    }
-
     public float GetDamagePerSecond()
     {
         return damage * fireRate;
@@ -61,8 +54,15 @@ public class TowerData : ScriptableObject
 
     // Calculated properties
     public float FireCooldown => 1f / fireRate;
-    public bool CanBeUpgraded => upgradeLevel < maxUpgradeLevel && nextUpgrade != null;
-    public bool IsMaxLevel => upgradeLevel >= maxUpgradeLevel;
+    public int MaxXPLevel => xpRequirements.Length;
+    public int[] XPRequirements => xpRequirements;
+    public TowerUpgradeChoice[] UpgradeChoicePool => upgradeChoicePool;
+
+    public int GetXpRequiredForLevel(int level)
+    {
+        if (level <= 1 || level > MaxXPLevel) return 0;
+        return xpRequirements[level - 2]; // array is o indexed, level 2 needs index 0;
+    }
 
     public GameObject ExplosionEffectPrefab => explosionEffectPrefab;
     public AudioClip ExplosionSound => explosionSound;

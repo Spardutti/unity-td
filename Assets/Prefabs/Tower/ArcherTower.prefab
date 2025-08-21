@@ -132,6 +132,7 @@ GameObject:
   - component: {fileID: 3127147920803160564}
   - component: {fileID: 2479403644088941887}
   - component: {fileID: 3722293488341600071}
+  - component: {fileID: 2768090063983874569}
   m_Layer: 0
   m_Name: ArcherTower
   m_TagString: Untagged
@@ -169,6 +170,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Tower
   towerData: {fileID: 11400000, guid: 396f03584756f0347982307264252d0c, type: 2}
+  currentXp: 0
+  currentLevel: 1
+  appliedUpgrades:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
   projectilesSpawnPoint: {fileID: 8905152759953546328}
   targetingMode: 0
   showRangeIndicator: 1
@@ -286,3 +300,24 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!65 &2768090063983874569
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8906526890594277176}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1, y: 1.9924805, z: 1.0712891}
+  m_Center: {x: 0, y: 0.011773586, z: -0.03564453}

@@ -7,6 +7,7 @@ public class Enemy : MonoBehaviour
     [SerializeField] private float maxHealth = 100f;
     [SerializeField] private float moveSpeed = 2f;
     [SerializeField] private int goldReward = 10;
+    [SerializeField] private int xpReward = 15;
     [SerializeField] private int attackDamage = 1;
 
     [Header("Visual Settings")]
@@ -27,6 +28,7 @@ public class Enemy : MonoBehaviour
     private int currentWaypointIndex;
     private bool isMoving = false;
     private Renderer enemyRenderer;
+    private Tower lastDamageSource;
 
     // external access
     public float CurrentHealth => currentHeath;
@@ -35,6 +37,7 @@ public class Enemy : MonoBehaviour
     public bool IsAlive => currentHeath > 0;
     public int GoldReward => goldReward;
     public int AttackDamage => attackDamage;
+    public int XPReward => xpReward;
 
     void Awake()
     {
@@ -160,14 +163,24 @@ public class Enemy : MonoBehaviour
         DestroyEnemy();
     }
 
-    public void TakeDamage(float damage)
+    public void TakeDamage(float damage, Tower damageSource)
     {
         if (!IsAlive) return;
 
         currentHeath -= damage;
         currentHeath = Mathf.Max(0, currentHeath);
 
-        Debug.Log($"Enemy took {damage} damage, now at {currentHeath}/{maxHealth}");
+        // Track damage source for exp attribution
+        if (damageSource != null)
+        {
+            lastDamageSource = damageSource;
+        }
+
+        if (showDebugInfo)
+        {
+
+            Debug.Log($"Enemy took {damage} damage, now at {currentHeath}/{maxHealth}");
+        }
 
         StartCoroutine(DamageFlash());
 
@@ -188,6 +201,20 @@ public class Enemy : MonoBehaviour
         else
         {
             Debug.LogError("Enemy: EconomyManager not found");
+        }
+
+        // Award XP to the tower that killed this enemy
+        if (lastDamageSource != null)
+        {
+            lastDamageSource.GainExperience(xpReward);
+            if (showDebugInfo)
+            {
+                Debug.Log($"Enemy: Awarded {xpReward} XP to tower {lastDamageSource.name}");
+            }
+        }
+        else if (showDebugInfo)
+        {
+            Debug.LogWarning("Enemy: No tower damage source found");
         }
 
         DestroyEnemy();

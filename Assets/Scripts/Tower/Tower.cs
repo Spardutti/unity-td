@@ -8,6 +8,11 @@ public class Tower : MonoBehaviour
     [Header("Tower Configuration")]
     [SerializeField] private TowerData towerData;
 
+    [Header("XP Progression")]
+    [SerializeField] private int currentXp = 0;
+    [SerializeField] private int currentLevel = 1;
+    [SerializeField] private TowerUpgradeChoice[] appliedUpgrades = new TowerUpgradeChoice[10];
+
     [Header("Component References")]
     [SerializeField] private Transform projectilesSpawnPoint;
 
@@ -40,6 +45,11 @@ public class Tower : MonoBehaviour
     public AttackType AttackType => towerData?.attackType ?? AttackType.Single;
     public float SplashRadius => towerData?.splashRadius ?? 0f;
 
+    public int CurrentXP => currentXp;
+    public int CurrentLevel => currentLevel;
+    public bool IsReadyToLevelUp => CanLevelUp();
+    public int XPToNextLevel => GetXPToNextLevel();
+
     // Data-driven properties
     public GameObject ProjectilePrefab => towerData != null ? towerData.projectilePrefab : null;
     public GameObject ExplosionEffectPrefab => towerData != null ? towerData.ExplosionEffectPrefab : null;
@@ -61,6 +71,13 @@ public class Tower : MonoBehaviour
         if (audioSource == null)
         {
             Debug.LogWarning($"Tower {name} has no audio source");
+        }
+
+        // Check for collider - required for hover and click detection
+        Collider towerCollider = GetComponent<Collider>();
+        if (towerCollider == null)
+        {
+            Debug.LogError($"Tower {name} is missing a Collider component! Hover detection and clicking will not work.");
         }
     }
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -111,13 +128,14 @@ public class Tower : MonoBehaviour
     {
         enemiesInRange.Clear();
         Enemy[] allEnemies = FindObjectsByType<Enemy>(FindObjectsSortMode.None);
+        float modifiedRange = GetModifiedRange();
 
         foreach (Enemy enemy in allEnemies)
         {
             if (enemy != null && enemy.IsAlive)
             {
                 float distance = Vector3.Distance(transform.position, enemy.transform.position);
-                if (distance <= AttackRange)
+                if (distance <= modifiedRange)
                 {
                     enemiesInRange.Add(enemy);
                 }
@@ -225,7 +243,7 @@ public class Tower : MonoBehaviour
         {
 
             // Instant damage
-            currentTarget.TakeDamage(AttackDamage);
+            currentTarget.TakeDamage(GetModifiedDamage(), this);
         }
 
         PlayFireSound();
@@ -321,9 +339,9 @@ public class Tower : MonoBehaviour
 
                     // Damage falloff based on distance
                     float damageMultiplier = 1f - (distance / SplashRadius) * 0.5f; // 50% minimum damage at edge
-                    float actualDamage = AttackDamage * damageMultiplier;
+                    float actualDamage = GetModifiedDamage() * damageMultiplier;
 
-                    enemy.TakeDamage(actualDamage);
+                    enemy.TakeDamage(actualDamage, this);
                 }
             }
         }
@@ -374,47 +392,101 @@ public class Tower : MonoBehaviour
 
     }
 
-    public bool CanUpgrade()
+    public void GainExperience(int xpAmount)
     {
-        return towerData != null && towerData.CanBeUpgraded;
-    }
+        if (xpAmount <= 0 || currentLevel >= towerData.MaxXPLevel) return;
 
-    public bool UpgradeTower()
-    {
-        if (!CanUpgrade()) return false;
+        currentXp += xpAmount;
 
-        TowerData newData = towerData.nextUpgrade;
-        if (newData == null) return false;
-
-        towerData = newData;
-
-        // Update visuals if needed
-        UpdateTowerVisuals();
-
-        return true;
-    }
-
-    private void UpdateTowerVisuals()
-    {
-        if (towerData == null) return;
-
-        // Update scale if specified
-        if (towerData.levelScales != null && towerData.upgradeLevel <= towerData.levelScales.Length)
+        if (debugProjectiles)
         {
-            float scale = towerData.levelScales[towerData.upgradeLevel - 1];
-            transform.localScale = transform.localScale * scale;
+            Debug.Log($"Tower {name} gained {xpAmount} xp");
         }
 
-        // Update material if specified
-        if (towerData.levelMaterials != null && towerData.upgradeLevel <= towerData.levelMaterials.Length)
+        // Check for multiple level ups
+        while (CanLevelUp())
         {
-            Material newMaterial = towerData.levelMaterials[towerData.upgradeLevel - 1];
-            if (towerRenderer != null && newMaterial != null)
+            // dont auto level up just mark ready
+            break;
+        }
+    }
+
+    public bool CanLevelUp()
+    {
+        if (currentLevel >= towerData.MaxXPLevel) return false;
+        int requiredXP = towerData.GetXpRequiredForLevel(currentLevel + 1);
+        return currentXp >= requiredXP;
+    }
+
+    public int GetXPToNextLevel()
+    {
+        if (currentLevel >= towerData.MaxXPLevel) return 0;
+        int requiredXP = towerData.GetXpRequiredForLevel(currentLevel + 1);
+        return Mathf.Max(0, requiredXP - currentXp);
+    }
+
+    public void ApplyUpgrade(TowerUpgradeChoice upgrade)
+    {
+        if (upgrade == null || !CanLevelUp()) return;
+
+        // Store the upgrade
+        appliedUpgrades[currentLevel - 1] = upgrade;
+        currentLevel++;
+
+        // Apply visual effect if available
+        if (upgrade.UpgradeParticleEffect != null)
+        {
+            Instantiate(upgrade.UpgradeParticleEffect, transform.position, Quaternion.identity);
+        }
+
+        if (debugProjectiles)
+        {
+            Debug.Log($"Tower {name} upgraded to level {currentLevel} applied upgrade {upgrade.upgradeName}");
+        }
+    }
+
+    public float GetModifiedDamage()
+    {
+        float damage = AttackDamage;
+        for (int i = 0; i < currentLevel - 1; i++)
+        {
+            if (appliedUpgrades[i] != null)
             {
-                towerRenderer.material = newMaterial;
+                damage *= appliedUpgrades[i].DamageMultiplier;
+                damage += appliedUpgrades[i].DamageBonus;
             }
         }
+        return damage;
     }
+
+    public float GetModifiedRange()
+    {
+        float range = AttackRange;
+        for (int i = 0; i < currentLevel - 1; i++)
+        {
+            if (appliedUpgrades[i] != null)
+            {
+                range *= appliedUpgrades[i].RangeMultiplier;
+                range += appliedUpgrades[i].RangeBonus;
+            }
+        }
+        return range;
+    }
+
+    public float GetModifiedFireRate()
+    {
+        float fireRate = AttackSpeed;
+        for (int i = 0; i < currentLevel - 1; i++)
+        {
+            if (appliedUpgrades[i] != null)
+            {
+                fireRate *= appliedUpgrades[i].FireRateMultiplier;
+                fireRate += appliedUpgrades[i].FireRateBonus;
+            }
+        }
+        return fireRate;
+    }
+
 
     // Method to get tower info for UI
     public string GetTowerInfo()

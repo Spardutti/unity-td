@@ -12,6 +12,13 @@ public class TowerRangeIndicator : MonoBehaviour
     void Awake()
     {
         tower = GetComponent<Tower>();
+        
+        // Check if tower has a collider for hover detection
+        Collider towerCollider = GetComponent<Collider>();
+        if (towerCollider == null)
+        {
+            Debug.LogWarning($"TowerRangeIndicator: Tower {gameObject.name} has TowerRangeIndicator but no Collider - hover detection won't work!");
+        }
     }
 
     void Start()
@@ -39,7 +46,7 @@ public class TowerRangeIndicator : MonoBehaviour
     {
         if (rangeIndicatorObject == null || tower == null) return;
 
-        float range = tower.AttackRange;
+        float range = tower.GetModifiedRange();
 
         // Scale the cylinder to match the tower's range
         // Cylinder default radius is 0.5, so we need range * 2 for diameter

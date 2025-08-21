@@ -30,6 +30,7 @@ public class TowerManager : MonoBehaviour
     private int towersBuilt = 0;
 
     private Tower hoveredTower;
+    private Tower selectedTower;
     private TowerData selectedTowerData;
 
     // Public properties
@@ -98,6 +99,12 @@ public class TowerManager : MonoBehaviour
         if (Physics.Raycast(ray, out RaycastHit hit))
         {
             newHoveredTower = hit.collider.GetComponent<Tower>();
+            
+            // Debug logging for hover detection issues
+            if (hit.collider != null && newHoveredTower == null)
+            {
+                Debug.LogWarning($"TowerManager: Raycast hit {hit.collider.name} but it doesn't have a Tower component");
+            }
         }
 
         // Handle hover state changes
@@ -107,14 +114,28 @@ public class TowerManager : MonoBehaviour
             if (hoveredTower != null)
             {
                 TowerRangeIndicator oldIndicator = hoveredTower.GetComponent<TowerRangeIndicator>();
-                oldIndicator?.HideRange();
+                if (oldIndicator == null)
+                {
+                    Debug.LogWarning($"TowerManager: Tower {hoveredTower.name} is missing TowerRangeIndicator component");
+                }
+                else
+                {
+                    oldIndicator.HideRange();
+                }
             }
 
             // Show new tower's range
             if (newHoveredTower != null)
             {
                 TowerRangeIndicator newIndicator = newHoveredTower.GetComponent<TowerRangeIndicator>();
-                newIndicator?.ShowRange();
+                if (newIndicator == null)
+                {
+                    Debug.LogWarning($"TowerManager: Tower {newHoveredTower.name} is missing TowerRangeIndicator component");
+                }
+                else
+                {
+                    newIndicator.ShowRange();
+                }
             }
 
             hoveredTower = newHoveredTower;
@@ -157,6 +178,11 @@ public class TowerManager : MonoBehaviour
 
     private void HandleInput()
     {
+
+        if (Mouse.current.leftButton.wasPressedThisFrame)
+        {
+            HandleTowerClick();
+        }
         // Fallback input handling using direct keyboard/mouse input
         if (placeTowerAction == null)
         {
@@ -169,17 +195,20 @@ public class TowerManager : MonoBehaviour
 
         if (cancelAction == null)
         {
-            if (Keyboard.current.escapeKey.wasPressedThisFrame && isPlacementMode)
+            if (Keyboard.current.escapeKey.wasPressedThisFrame)
             {
-                CancelPlacement();
+
+                if (isPlacementMode)
+                {
+                    CancelPlacement();
+                }
+                else if (selectedTower != null)
+                {
+                    DeselectTower();
+                }
             }
         }
 
-        // Toggle placement mode with T key
-        if (Keyboard.current.tKey.wasPressedThisFrame)
-        {
-            TogglePlacementMode();
-        }
     }
 
     private void OnPlaceTower(InputAction.CallbackContext context)
@@ -188,8 +217,92 @@ public class TowerManager : MonoBehaviour
         {
             TryPlaceTower();
         }
+        else
+        {
+            HandleTowerClick();
+        }
         // Don't automatically enter placement mode on click
     }
+
+    private void HandleTowerClick()
+    {
+        if (isPlacementMode) return; // Don't select tower if in placement mode
+
+        Vector2 mousePos = Mouse.current.position.ReadValue();
+        Ray ray = playerCamera.ScreenPointToRay(mousePos);
+
+        if (Physics.Raycast(ray, out RaycastHit hit))
+        {
+            Tower clickedTower = hit.collider.GetComponent<Tower>();
+            if (clickedTower != null)
+            {
+                if (clickedTower.IsReadyToLevelUp)
+                {
+                    // Show upgrade ui
+                    SelectTower(clickedTower);
+                    ShowUpgradeUI(clickedTower);
+                }
+                else
+                {
+                    // Select tower for info display
+                    SelectTower(clickedTower);
+                }
+            }
+            else
+            {
+                DeselectTower();
+            }
+        }
+        else
+        {
+            DeselectTower();
+        }
+    }
+
+    private void SelectTower(Tower tower)
+    {
+        if (selectedTower != null)
+        {
+            // Hide previous tower's range
+            TowerRangeIndicator oldIndicator = selectedTower.GetComponent<TowerRangeIndicator>();
+            oldIndicator?.HideRange();
+        }
+
+        selectedTower = tower;
+
+        if (selectedTower != null)
+        {
+            // Show selected tower's range
+            TowerRangeIndicator newIndicator = selectedTower.GetComponent<TowerRangeIndicator>();
+            newIndicator?.ShowRange();
+
+
+        }
+    }
+
+    private void DeselectTower()
+    {
+        if (selectedTower != null)
+        {
+            TowerRangeIndicator indicator = selectedTower.GetComponent<TowerRangeIndicator>();
+            indicator?.HideRange();
+            selectedTower = null;
+        }
+    }
+
+    private void ShowUpgradeUI(Tower tower)
+    {
+        if (TowerUpgradeUI.Instance != null)
+        {
+            TowerUpgradeUI.Instance.ShowUpgradePanel(tower);
+        }
+        else
+        {
+            Debug.LogError("TowerManager: TowerUpgradeUI not found");
+        }
+    }
+
+
 
     private void OnCancel(InputAction.CallbackContext context)
     {
@@ -436,6 +549,7 @@ public class TowerManager : MonoBehaviour
     public void CancelPlacement()
     {
         isPlacementMode = false;
+        selectedTower = null;
 
         if (previewTower != null)
         {
@@ -449,6 +563,8 @@ public class TowerManager : MonoBehaviour
             DestroyImmediate(previewTower);
             previewTower = null;
         }
+
+        DeselectTower();
 
     }
 

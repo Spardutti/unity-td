@@ -19,6 +19,8 @@ MonoBehaviour:
   range: 4.5
   fireRate: 1
   cost: 50
+  turretRotationSpeed: 180
+  aimingThreshold: 5
   attackType: 0
   defaultTargetingMode: 0
   splashRadius: 0
@@ -30,7 +32,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 6c311e54673f2304e86ec1dc888e2fb3, type: 2}
   - {fileID: 11400000, guid: 83a866101e694674b9fb538dfb29904c, type: 2}
   - {fileID: 11400000, guid: 9cb167c053d80c74b9d6662a1e7ce4fa, type: 2}
-  towerPrefab: {fileID: 8906526890594277176, guid: 0dd17ae4e58222b49a9514edf8920d9d, type: 3}
+  towerPrefab: {fileID: 5042708293336078087, guid: 619f8fa0583e05c4b8febdf62dfb8f93, type: 3}
   projectilePrefab: {fileID: 6470800904125922143, guid: bc1e34df42ff77549a10b8e722e0c927, type: 3}
   muzzleFlashEffect: {fileID: 0}
   explosionEffectPrefab: {fileID: 0}

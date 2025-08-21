@@ -15,6 +15,10 @@ public class TowerData : ScriptableObject
     public float fireRate = 1f;
     public int cost = 50;
 
+    [Header("Turret Rotation")]
+    public float turretRotationSpeed = 180f; // degrees per second
+    public float aimingThreshold = 5f; // degrees - how close to target before firing
+
     [Header("Attack Type")]
     public AttackType attackType = AttackType.Single;
     public TargetingMode defaultTargetingMode = TargetingMode.Closest;

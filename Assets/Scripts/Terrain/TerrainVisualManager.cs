@@ -6,6 +6,7 @@ public class TerrainVisualManager : MonoBehaviour
     [SerializeField] private GameObject grassTilePrefab;
     [SerializeField] private GameObject pathTilePrefab;
     [SerializeField] private GameObject buildableTilePrefab;
+    [SerializeField] private GameObject pathCornerTilePrefab;
 
     private GridManager gridManager;
     private MultiPathManager multiPathManager;
@@ -67,6 +68,10 @@ public class TerrainVisualManager : MonoBehaviour
         {
             Debug.Log("TerrainVisualManager: All terrain prefabs validated successfully.");
         }
+        if (pathCornerTilePrefab != null)
+        {
+            Debug.Log("TerrainVisualManager: Path Corner Tile Prefab validated successfully.");
+        }
     }
 
     public void GenerateTerrainVisuals()
@@ -111,7 +116,7 @@ public class TerrainVisualManager : MonoBehaviour
 
     private GameObject CreateTileGameObject(int gridX, int gridY, CellType cellType)
     {
-        GameObject prefabToUse = GetPrefabForCellType(cellType);
+        GameObject prefabToUse = GetPrefabForCellType(cellType, gridX, gridY);
 
         if (prefabToUse == null)
         {
@@ -127,19 +132,108 @@ public class TerrainVisualManager : MonoBehaviour
         Vector3 worldPos = gridManager.GridToWorld(gridX, gridY);
         tileObj.transform.position = new Vector3(worldPos.x, 0, worldPos.z);
 
+        if (cellType == CellType.Path)
+        {
+            if (IsCornerPath(gridX, gridY))
+            {
+                RotateCornerTile(tileObj, gridX, gridY);
+            }
+            else
+            {
+                RotatePathTile(tileObj, gridX, gridY);
+            }
+        }
+
         return tileObj;
     }
 
-    private GameObject GetPrefabForCellType(CellType cellType)
+    private void RotateCornerTile(GameObject tileObj, int gridX, int gridY)
     {
+        bool hasUp = HasPathNeighbor(gridX, gridY + 1);
+        bool hasDown = HasPathNeighbor(gridX, gridY - 1);
+        bool hasLeft = HasPathNeighbor(gridX - 1, gridY);
+        bool hasRight = HasPathNeighbor(gridX + 1, gridY);
+
+        // Determine rotation based on which two directions have neighbors
+        // Assuming default corner prefab connects up+right
+        float rotationY = 0f;
+        if (hasUp && hasRight)
+        {
+            rotationY = 90f;
+        }
+        else if (hasDown && hasRight)
+        {
+            rotationY = 90f;
+        }
+        else if (hasDown && hasLeft)
+        {
+            rotationY = 270f;
+        }
+        else if (hasUp && hasLeft)
+        {
+            rotationY = 180f;
+        }
+
+        tileObj.transform.rotation = Quaternion.Euler(0, rotationY, 0);
+
+    }
+
+    private void RotatePathTile(GameObject tileObj, int gridX, int gridY)
+    {
+        // check if path flows horizontally by looking at left/right neighbors
+        bool hasLeftPath = HasPathNeighbor(gridX - 1, gridY);
+        bool hasRightPath = HasPathNeighbor(gridX + 1, gridY);
+
+        // if path has horizontal neighbors, rotate 90 degrees
+        if (hasLeftPath || hasRightPath)
+        {
+            tileObj.transform.rotation = Quaternion.Euler(0, 90, 0);
+        }
+    }
+
+    private bool HasPathNeighbor(int x, int y)
+    {
+        if (!gridManager.IsValidGridPosition(x, y))
+        {
+            return false;
+        }
+
+        GridCell cell = gridManager.GetCell(x, y);
+        return cell != null && cell.cellType == CellType.Path;
+    }
+
+    private GameObject GetPrefabForCellType(CellType cellType, int gridX, int gridY)
+    {
+        if (cellType == CellType.Path)
+        {
+            return IsCornerPath(gridX, gridY) ? pathCornerTilePrefab : pathTilePrefab;
+        }
         return cellType switch
         {
-            CellType.Path => pathTilePrefab,
             CellType.Buildable => buildableTilePrefab ?? grassTilePrefab,
             CellType.Blocked => pathTilePrefab,
             CellType.Occupied => grassTilePrefab,
             _ => grassTilePrefab
         };
+    }
+
+    private bool IsCornerPath(int gridX, int gridY)
+    {
+        // count path neighbors in 4 directions
+        bool hasUp = HasPathNeighbor(gridX, gridY + 1);
+        bool hasDown = HasPathNeighbor(gridX, gridY - 1);
+        bool hasLeft = HasPathNeighbor(gridX - 1, gridY);
+        bool hasRight = HasPathNeighbor(gridX + 1, gridY);
+
+        int neighborCount = (hasUp ? 1 : 0) + (hasDown ? 1 : 0) + (hasLeft ? 1 : 0) + (hasRight ? 1 : 0);
+
+        // Corner: exactly 2 neighbors that are perpendicular to each other
+        if (neighborCount == 2)
+        {
+            return (hasUp && hasLeft) || (hasUp && hasRight) || (hasDown && hasLeft) || (hasDown && hasRight);
+        }
+
+        return false;
     }
 
     private void ClearExistingTiles()

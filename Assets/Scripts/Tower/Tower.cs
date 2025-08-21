@@ -28,8 +28,14 @@ public class Tower : MonoBehaviour
     [SerializeField] private bool playFireSound = true;
     [SerializeField] private float soundVolume = 1f;
 
+    [Header("Turret Rotation")]
+    [SerializeField] private Transform turretTransform;
+
     private float lastAttackTime;
     private Enemy currentTarget;
+
+    private bool isAiming = false;
+    private Coroutine aimingCoroutine;
     private GridManager gridManager;
     private Vector2Int gridPosition;
     private Renderer towerRenderer;
@@ -56,6 +62,8 @@ public class Tower : MonoBehaviour
     public AudioClip FireSound => towerData != null ? towerData.fireSound : null;
     public AudioClip ExplosionSound => towerData != null ? towerData.ExplosionSound : null;
     public GameObject MuzzleFlashEffect => towerData != null ? towerData.muzzleFlashEffect : null;
+    public float TurretRotationSpeed => towerData != null ? towerData.turretRotationSpeed : 180f;
+    public float AimingThreshold => towerData != null ? towerData.aimingThreshold : 5f;
 
     void Awake()
     {
@@ -78,6 +86,12 @@ public class Tower : MonoBehaviour
         if (towerCollider == null)
         {
             Debug.LogError($"Tower {name} is missing a Collider component! Hover detection and clicking will not work.");
+        }
+
+        turretTransform = transform.Find("Turret");
+        if (turretTransform == null)
+        {
+            Debug.LogWarning($"Tower {name} has no 'Turret' child - turret rotation disabled");
         }
     }
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -149,6 +163,12 @@ public class Tower : MonoBehaviour
         if (currentTarget != null && (!currentTarget.IsAlive || !enemiesInRange.Contains(currentTarget)))
         {
             currentTarget = null;
+            if (aimingCoroutine != null)
+            {
+                StopCoroutine(aimingCoroutine);
+                aimingCoroutine = null;
+                isAiming = false;
+            }
         }
 
         // Find new target if we dont have one
@@ -200,23 +220,60 @@ public class Tower : MonoBehaviour
     {
         if (currentTarget == null) return;
 
-        // Face the target (only rotate on Y axis to prevent tilting)
-        Vector3 direction = currentTarget.transform.position - transform.position;
-        direction.y = 0; // Keep only horizontal direction
-        if (direction != Vector3.zero)
+        // Start aiming if not already aiming
+        if (!isAiming && turretTransform != null)
         {
-            Quaternion targetRotation = Quaternion.LookRotation(direction);
-            transform.rotation = Quaternion.Euler(0, targetRotation.eulerAngles.y, 0);
+            if (aimingCoroutine != null)
+            {
+                StopCoroutine(aimingCoroutine);
+            }
+            aimingCoroutine = StartCoroutine(PreAimAndFire());
+        }
+        // fallback for towers without turret
+        else if (turretTransform == null)
+        {
+            {
+                FireProjectile();
+                lastAttackTime = Time.time;
+                StartCoroutine(AttackFlash());
+            }
+        }
+    }
+
+    private System.Collections.IEnumerator PreAimAndFire()
+    {
+        isAiming = true;
+        while (currentTarget != null && currentTarget.IsAlive && enemiesInRange.Contains(currentTarget))
+        {
+            // Calculate target direction
+            Vector3 direction = currentTarget.transform.position - turretTransform.position;
+            direction.y = 0; // Keep only horizontal direction
+
+            if (direction != Vector3.zero)
+            {
+                Quaternion targetRotation = Quaternion.LookRotation(direction);
+                float targetY = targetRotation.eulerAngles.y;
+
+                // smoothly rotate turret toward target
+                float currentY = turretTransform.eulerAngles.y;
+                float newY = Mathf.MoveTowardsAngle(currentY, targetY, TurretRotationSpeed * Time.deltaTime);
+                turretTransform.rotation = Quaternion.Euler(0, newY, 0);
+
+                // check if aimed close enough to fire
+                float angleDifference = Mathf.Abs(Mathf.DeltaAngle(currentY, targetY));
+
+                if (angleDifference < AimingThreshold && Time.time > lastAttackTime + (1f / AttackSpeed))
+                {
+                    FireProjectile();
+                    lastAttackTime = Time.time;
+                    StartCoroutine(AttackFlash());
+                }
+            }
+            yield return null;
         }
 
-
-        FireProjectile();
-
-        lastAttackTime = Time.time;
-
-
-        // Visual Feedback
-        StartCoroutine(AttackFlash());
+        isAiming = false;
+        aimingCoroutine = null;
     }
 
     private void FireProjectile()
@@ -496,6 +553,10 @@ public class Tower : MonoBehaviour
 
     void OnDestroy()
     {
+        if (aimingCoroutine != null)
+        {
+            StopCoroutine(aimingCoroutine);
+        }
         if (gridManager != null)
         {
             gridManager.FreeCell(gridPosition);

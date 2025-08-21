@@ -18,7 +18,7 @@ MonoBehaviour:
   damage: 40
   range: 4
   fireRate: 0.5
-  cost: 100
+  cost: 75
   attackType: 1
   defaultTargetingMode: 0
   splashRadius: 2

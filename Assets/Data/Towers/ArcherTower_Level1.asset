@@ -33,7 +33,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 83a866101e694674b9fb538dfb29904c, type: 2}
   - {fileID: 11400000, guid: 9cb167c053d80c74b9d6662a1e7ce4fa, type: 2}
   towerPrefab: {fileID: 5042708293336078087, guid: 619f8fa0583e05c4b8febdf62dfb8f93, type: 3}
-  projectilePrefab: {fileID: 6470800904125922143, guid: bc1e34df42ff77549a10b8e722e0c927, type: 3}
+  projectilePrefab: {fileID: 3645310222698321576, guid: 141e23615e0ded24d83cad2f9ee2596e, type: 3}
   muzzleFlashEffect: {fileID: 0}
   explosionEffectPrefab: {fileID: 0}
   enableDamageFalloff: 1

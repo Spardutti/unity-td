@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 211503d417965f1429bbc0ade95ab597, type: 3}
+  m_Name: GoldDrop1
+  m_EditorClassIdentifier: Assembly-CSharp::SkillData
+  skillId: gold1
+  skillName: Gold Drop
+  description: Increase Gold drop by 50%
+  skillIcon: {fileID: 0}
+  prerequisiteSkillIds: []
+  skillPointCost: 0
+  goldCost: 0
+  targetTowerType: {fileID: 0}
+  modifiers:
+  - statType: 6
+    modifierType: 0
+    value: 50
+    displayText: 
+  isUnlocked: 0
+  canUnlock: 0

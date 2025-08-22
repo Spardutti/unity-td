@@ -42,6 +42,7 @@ public class Tower : MonoBehaviour
     private List<Enemy> enemiesInRange = new List<Enemy>();
 
     private AudioSource audioSource;
+    private TowerGlowEffect glowEffect;
 
     public float AttackRange => towerData?.range ?? 3f;
     public float AttackDamage => towerData?.damage ?? 25f;
@@ -70,6 +71,7 @@ public class Tower : MonoBehaviour
         gridManager = FindFirstObjectByType<GridManager>();
         towerRenderer = GetComponentInChildren<Renderer>();
         audioSource = GetComponent<AudioSource>();
+        glowEffect = GetComponent<TowerGlowEffect>();
 
         if (towerRenderer == null)
         {
@@ -79,6 +81,11 @@ public class Tower : MonoBehaviour
         if (audioSource == null)
         {
             Debug.LogWarning($"Tower {name} has no audio source");
+        }
+        
+        if (glowEffect == null)
+        {
+            glowEffect = gameObject.AddComponent<TowerGlowEffect>();
         }
 
         // Check for collider - required for hover and click detection
@@ -474,6 +481,10 @@ public class Tower : MonoBehaviour
         while (CanLevelUp())
         {
             // dont auto level up just mark ready
+            if (glowEffect != null && !glowEffect.IsGlowing)
+            {
+                glowEffect.StartGlowing();
+            }
             break;
         }
     }
@@ -499,6 +510,12 @@ public class Tower : MonoBehaviour
         // Store the upgrade
         appliedUpgrades[currentLevel - 1] = upgrade;
         currentLevel++;
+        
+        // Stop glowing after upgrade
+        if (glowEffect != null && glowEffect.IsGlowing)
+        {
+            glowEffect.StopGlowing();
+        }
 
         // Apply visual effect if available
         if (upgrade.UpgradeParticleEffect != null)
@@ -509,6 +526,12 @@ public class Tower : MonoBehaviour
         if (debugProjectiles)
         {
             Debug.Log($"Tower {name} upgraded to level {currentLevel} applied upgrade {upgrade.upgradeName}");
+        }
+        
+        // Check if ready for another level up
+        if (CanLevelUp() && glowEffect != null)
+        {
+            glowEffect.StartGlowing();
         }
     }
 

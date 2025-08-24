@@ -14,16 +14,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SkillData
   skillId: gold1
   skillName: Gold Drop
-  description: Increase Gold drop by 50%
+  description: Increase Gold drop by 25%
   skillIcon: {fileID: 0}
   prerequisiteSkillIds: []
   skillPointCost: 0
-  goldCost: 0
   targetTowerType: {fileID: 0}
   modifiers:
   - statType: 6
-    modifierType: 0
-    value: 50
+    modifierType: 1
+    value: 25
     displayText: 
   isUnlocked: 0
-  canUnlock: 0
+  canUnlock: 1

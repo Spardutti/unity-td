@@ -47,14 +47,32 @@ public class SkillManager : MonoBehaviour
 
     private void InitializeSkillTrees()
     {
+
+        if (enableDebug)
+            Debug.Log($"SkillManager: Starting InitializeSkillTrees - Available trees: {availableSkillTrees?.Length ?? 0}");
+
         skillTreeLookup.Clear();
         allSkillsLookup.Clear();
 
-        if (availableSkillTrees == null) return;
+        if (availableSkillTrees == null)
+        {
+            if (enableDebug)
+                Debug.LogWarning("SkillManager: availableSkillTrees is null");
+            return;
+        }
 
         foreach (var skillTree in availableSkillTrees)
         {
-            if (skillTree == null) continue;
+            if (skillTree == null)
+            {
+                if (enableDebug)
+                    Debug.LogWarning("SkillManager: Found null skill tree in array");
+                continue;
+            }
+
+            if (enableDebug)
+                Debug.Log($"SkillManager: Processing skill tree '{skillTree.treeName}' with {skillTree.skills?.Length ?? 0} skills");
+
 
             skillTreeLookup[skillTree.treeId] = skillTree;
 
@@ -65,10 +83,26 @@ public class SkillManager : MonoBehaviour
                     if (skill != null)
                     {
                         allSkillsLookup[skill.skillId] = skill;
+                        if (enableDebug)
+                            Debug.Log($"SkillManager: Registered skill '{skill.skillName}' ({skill.skillId})");
+
+                    }
+                    else if (enableDebug)
+                    {
+                        Debug.LogWarning("SkillManager: Found null skill in skill tree");
                     }
                 }
             }
+            // Validate the skill tree
+            bool isValid = skillTree.ValidateSkillTree();
+            if (enableDebug)
+                Debug.Log($"SkillManager: Skill tree '{skillTree.treeName}' validation: {(isValid ? "PASSED" : "FAILED")}");
+
         }
+
+        if (enableDebug)
+            Debug.Log($"SkillManager: Initialization complete - {skillTreeLookup.Count} trees, {allSkillsLookup.Count} skills total");
+
 
         UpdateSkillAvailability();
         OnSkillTreesUpdated?.Invoke();

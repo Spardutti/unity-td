@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9aecd4d74fdabe43922696c8043373f, type: 3}
+  m_Name: Range1
+  m_EditorClassIdentifier: Assembly-CSharp::SkillTreeData
+  treeId: range_tree_1
+  treeName: Arrow Tower 1
+  treeDescription: Skills for arrow tower
+  treeIcon: {fileID: 0}
+  associatedTowerType: {fileID: 11400000, guid: 396f03584756f0347982307264252d0c, type: 2}
+  skills:
+  - {fileID: 11400000, guid: 7b12daac7bf2ae54aba87b7ae02b0964, type: 2}
+  - {fileID: 11400000, guid: bb314a187953bb74eb5d3f5b325f0b5d, type: 2}
+  - {fileID: 11400000, guid: 5c587fc3e1281e74eaf46a472b4d4d17, type: 2}
+  maxSkillsPerRow: 4
+  skillSpacing: {x: 12, y: 100}
+  requiresSequentialUnlock: 0

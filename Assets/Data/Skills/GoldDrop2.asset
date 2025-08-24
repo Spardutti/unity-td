@@ -12,13 +12,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 211503d417965f1429bbc0ade95ab597, type: 3}
   m_Name: GoldDrop2
   m_EditorClassIdentifier: Assembly-CSharp::SkillData
-  skillId: gold1
+  skillId: gold2
   skillName: Gold Drop
-  description: Increase Gold drop by 50%
+  description: Increase Gold drop by 25%
   skillIcon: {fileID: 0}
-  prerequisiteSkillIds: []
+  prerequisiteSkillIds:
+  - gold1
   skillPointCost: 0
-  goldCost: 0
   targetTowerType: {fileID: 0}
   modifiers:
   - statType: 6

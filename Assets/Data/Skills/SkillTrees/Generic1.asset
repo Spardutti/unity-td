@@ -12,12 +12,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e9aecd4d74fdabe43922696c8043373f, type: 3}
   m_Name: Generic1
   m_EditorClassIdentifier: Assembly-CSharp::SkillTreeData
-  treeId: 
-  treeName: New Skill Tree
-  treeDescription: Description of the skill tree
+  treeId: generic1
+  treeName: Generic1
+  treeDescription: basic skills
   treeIcon: {fileID: 0}
   associatedTowerType: {fileID: 0}
-  skills: []
+  skills:
+  - {fileID: 11400000, guid: 010ec37e4ff710e4986586f73c459d9a, type: 2}
+  - {fileID: 11400000, guid: c44b9e0c0d06e0e4b845a6eaf6e49953, type: 2}
   maxSkillsPerRow: 4
   skillSpacing: {x: 12, y: 100}
-  requiresSequentialUnlock: 0
+  requiresSequentialUnlock: 1

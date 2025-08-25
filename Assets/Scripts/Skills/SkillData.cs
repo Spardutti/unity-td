@@ -49,18 +49,6 @@ public class SkillData : ScriptableObject
         return prerequisiteSkillIds != null && prerequisiteSkillIds.Length > 0;
     }
 
-    public float GetModifierValue(StatType statType)
-    {
-        foreach (var modifier in modifiers)
-        {
-            if (modifier.statType == statType)
-            {
-                return modifier.value;
-            }
-        }
-        return 0f;
-    }
-
     public bool HasModifier(StatType statType)
     {
         foreach (var modifier in modifiers)

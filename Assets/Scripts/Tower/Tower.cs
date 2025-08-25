@@ -82,7 +82,7 @@ public class Tower : MonoBehaviour
         {
             Debug.LogWarning($"Tower {name} has no audio source");
         }
-        
+
         if (glowEffect == null)
         {
             glowEffect = gameObject.AddComponent<TowerGlowEffect>();
@@ -510,7 +510,7 @@ public class Tower : MonoBehaviour
         // Store the upgrade
         appliedUpgrades[currentLevel - 1] = upgrade;
         currentLevel++;
-        
+
         // Stop glowing after upgrade
         if (glowEffect != null && glowEffect.IsGlowing)
         {
@@ -527,7 +527,7 @@ public class Tower : MonoBehaviour
         {
             Debug.Log($"Tower {name} upgraded to level {currentLevel} applied upgrade {upgrade.upgradeName}");
         }
-        
+
         // Check if ready for another level up
         if (CanLevelUp() && glowEffect != null)
         {
@@ -546,6 +546,21 @@ public class Tower : MonoBehaviour
                 damage += appliedUpgrades[i].DamageBonus;
             }
         }
+
+        if (SkillManager.Instance != null)
+        {
+            // Apply flat bonuses first
+            float flatBonus = SkillManager.Instance.GetFlatModifier(StatType.Damage, towerData);
+            damage += flatBonus;
+
+            // Apply percentage bonuses (convert percentage to multiplier)
+            float percentageBonus = SkillManager.Instance.GetPercentageModifier(StatType.Damage, towerData);
+            damage *= (1f + percentageBonus / 100f);
+
+            // Apply multipliers last
+            float multiplier = SkillManager.Instance.GetMultiplierModifier(StatType.Damage, towerData);
+            damage *= multiplier;
+        }
         return damage;
     }
 
@@ -559,6 +574,22 @@ public class Tower : MonoBehaviour
                 range *= appliedUpgrades[i].RangeMultiplier;
                 range += appliedUpgrades[i].RangeBonus;
             }
+        }
+
+        // Apply skill tree bonuses
+        if (SkillManager.Instance != null)
+        {
+            // Apply flat bonuses first
+            float flatBonus = SkillManager.Instance.GetFlatModifier(StatType.Range, towerData);
+            range += flatBonus;
+
+            // Apply percentage bonuses (convert percentage to multiplier)
+            float percentageBonus = SkillManager.Instance.GetPercentageModifier(StatType.Range, towerData);
+            range *= (1f + percentageBonus / 100f);
+
+            // Apply multipliers last
+            float multiplier = SkillManager.Instance.GetMultiplierModifier(StatType.Range, towerData);
+            range *= multiplier;
         }
         return range;
     }
@@ -574,7 +605,29 @@ public class Tower : MonoBehaviour
                 fireRate += appliedUpgrades[i].FireRateBonus;
             }
         }
+
+        // Apply skill tree bonuses
+        if (SkillManager.Instance != null)
+        {
+            // Apply flat bonuses first
+            float flatBonus = SkillManager.Instance.GetFlatModifier(StatType.FireRate, towerData);
+            fireRate += flatBonus;
+
+            // Apply percentage bonuses (convert percentage to multiplier)
+            float percentageBonus = SkillManager.Instance.GetPercentageModifier(StatType.FireRate, towerData);
+            fireRate *= (1f + percentageBonus / 100f);
+
+            // Apply multipliers last
+            float multiplier = SkillManager.Instance.GetMultiplierModifier(StatType.FireRate, towerData);
+            fireRate *= multiplier;
+        }
         return fireRate;
+    }
+
+    public int GetModifiedCost()
+    {
+        int cost = towerData.cost;
+        return cost;
     }
 
 

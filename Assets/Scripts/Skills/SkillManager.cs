@@ -236,7 +236,7 @@ public class SkillManager : MonoBehaviour
         return availableSkillTrees;
     }
 
-    public float GetModifierValue(StatType statType, TowerData towerType = null)
+    public float GetFlatModifier(StatType statType, TowerData towerType = null)
     {
         float totalModifier = 0f;
 
@@ -244,15 +244,68 @@ public class SkillManager : MonoBehaviour
         {
             if (allSkillsLookup.TryGetValue(skillId, out SkillData skill))
             {
-                // Apply generic skill or tower-specific skill modifiers that match the stat type
                 if (skill.IsGenericSkill || (skill.IsTowerSpecific && skill.targetTowerType == towerType))
                 {
-                    totalModifier += skill.GetModifierValue(statType);
+                    foreach (var modifier in skill.modifiers)
+                    {
+                        if (modifier.statType == statType && modifier.modifierType == ModifierType.Flat)
+                        {
+                            totalModifier += modifier.value;
+                        }
+                    }
                 }
             }
         }
 
         return totalModifier;
+    }
+
+    public float GetPercentageModifier(StatType statType, TowerData towerType = null)
+    {
+        float totalModifier = 0f;
+
+        foreach (string skillId in unlockedSkillIds)
+        {
+            if (allSkillsLookup.TryGetValue(skillId, out SkillData skill))
+            {
+                if (skill.IsGenericSkill || (skill.IsTowerSpecific && skill.targetTowerType == towerType))
+                {
+                    foreach (var modifier in skill.modifiers)
+                    {
+                        if (modifier.statType == statType && modifier.modifierType == ModifierType.Percentage)
+                        {
+                            totalModifier += modifier.value;
+                        }
+                    }
+                }
+            }
+        }
+
+        return totalModifier;
+    }
+
+    public float GetMultiplierModifier(StatType statType, TowerData towerType = null)
+    {
+        float totalMultiplier = 1f;
+
+        foreach (string skillId in unlockedSkillIds)
+        {
+            if (allSkillsLookup.TryGetValue(skillId, out SkillData skill))
+            {
+                if (skill.IsGenericSkill || (skill.IsTowerSpecific && skill.targetTowerType == towerType))
+                {
+                    foreach (var modifier in skill.modifiers)
+                    {
+                        if (modifier.statType == statType && modifier.modifierType == ModifierType.Multiplier)
+                        {
+                            totalMultiplier *= modifier.value;
+                        }
+                    }
+                }
+            }
+        }
+
+        return totalMultiplier;
     }
 
     public bool IsSkillUnlocked(string skillId)

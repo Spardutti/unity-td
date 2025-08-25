@@ -17,10 +17,13 @@ MonoBehaviour:
   description: Increase Range by 10%
   skillIcon: {fileID: 0}
   prerequisiteSkillIds:
-  - range_1
   - range_2
   skillPointCost: 3
   targetTowerType: {fileID: 11400000, guid: 396f03584756f0347982307264252d0c, type: 2}
-  modifiers: []
-  isUnlocked: 0
+  modifiers:
+  - statType: 1
+    modifierType: 0
+    value: 1
+    displayText: +1 range
+  isUnlocked: 1
   canUnlock: 0
